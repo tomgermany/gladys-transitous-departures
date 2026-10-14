@@ -12,7 +12,23 @@
   "gladys_version": ">=5.1.0",
   "categories": ["services"],
   "transports": ["cloud"],
-  "widgets": [
+  "config_schema": [
+    {
+      "key": "widget_setup_info",
+      "type": "section",
+      "label": {
+        "de": "Hinweis zur Einrichtung",
+        "en": "Widget setup information",
+        "fr": "Informations de configuration du widget"
+      },
+      "description": {
+        "de": "Bitte legen Sie vor dem Hinzufügen des Widgets zum Dashboard die Koordinaten Ihres gewünschten Standorts fest. Benötigt werden Breitengrad und Längengrad im Dezimalformat, zum Beispiel 49.350 und 8.690. Beim Hinzufügen des Widgets stellen Sie anschließend Suchradius, Anzahl der Abfahrten und Aktualisierungsintervall ein. Der Standard-Suchradius beträgt 2.000 Meter.",
+        "en": "Before adding the widget to your dashboard, determine the coordinates of your chosen location. You need latitude and longitude in decimal format, for example 49.350 and 8.690. When adding the widget, you can then configure the search radius, number of departures and refresh interval. The default search radius is 2,000 metres.",
+        "fr": "Avant d’ajouter le widget à votre tableau de bord, déterminez les coordonnées du lieu choisi. Vous avez besoin de la latitude et de la longitude au format décimal, par exemple 49.350 et 8.690. Lors de l’ajout du widget, vous pourrez définir le rayon de recherche, le nombre de départs et l’intervalle d’actualisation. Le rayon de recherche par défaut est de 2 000 mètres."
+      }
+    }
+  ],
+ "widgets": [
     {
       "key": "transitous_departures",
       "label": {
