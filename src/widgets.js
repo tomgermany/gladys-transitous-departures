@@ -14,7 +14,6 @@ function shortText(value, maxLength) {
   return `${result.slice(0, maxLength - 1)}…`;
 }
 
-
 function stopSummary(stops) {
   if (!stops.length) return 'Keine Haltestelle gefunden';
 
@@ -23,7 +22,6 @@ function stopSummary(stops) {
     80,
   );
 }
-
 
 export const WIDGETS = {
   [TRANSITOUS_DEPARTURES_WIDGET]: {
