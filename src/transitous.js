@@ -1,1 +1,300 @@
 
+const API_URL = 'https://api.transitous.org/api/v6/stoptimes';
+const APP_NAME = 'Gladys Transitous Departures';
+const APP_VERSION = '0.1.0';
+const CONTACT = 'https://github.com/tomgermany/gladys-transitous-departures';
+
+function getEpoch(value) {
+  if (typeof value === 'number') {
+    return value > 1e12 ? value : value * 1000;
+  }
+
+  if (typeof value === 'string') {
+    const milliseconds = Date.parse(value);
+    return Number.isFinite(milliseconds) ? milliseconds : null;
+  }
+
+  return null;
+}
+
+function getRawTime(item) {
+  return item.departure ?? item.scheduled ?? item.place?.departure ?? null;
+}
+
+function formatLocalTime(epochMs, timeZone) {
+  if (!timeZone) return null;
+
+  try {
+    return new Intl.DateTimeFormat('de-DE', {
+      timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).format(new Date(epochMs));
+  } catch {
+    return null;
+  }
+}
+
+function haversineMeters(lat1, lon1, lat2, lon2) {
+  const radians = (degrees) => (degrees * Math.PI) / 180;
+  const dLat = radians(lat2 - lat1);
+  const dLon = radians(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(radians(lat1)) *
+      Math.cos(radians(lat2)) *
+      Math.sin(dLon / 2) ** 2;
+
+  return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function modeCategory(mode) {
+  if (['BUS', 'ODM'].includes(mode)) return 'BUS';
+
+  if (['TRAM', 'SUBWAY'].includes(mode)) return 'TRAM';
+
+  if (
+    [
+      'RAIL',
+      'REGIONAL_RAIL',
+      'REGIONAL_FAST_RAIL',
+      'SUBURBAN',
+      'HIGHSPEED_RAIL',
+      'HIGH_SPEED_RAIL',
+      'LONG_DISTANCE',
+      'NIGHT_RAIL',
+    ].includes(mode)
+  ) {
+    return 'RAIL';
+  }
+
+  if (mode === 'FERRY') return 'FERRY';
+  if (mode === 'FUNICULAR') return 'FUNICULAR';
+
+  return null;
+}
+
+function displayedMode(mode) {
+  if (mode === 'FERRY') return 'FÄHRE';
+  if (mode === 'SUBWAY') return 'U-BAHN';
+  if (mode === 'SUBURBAN') return 'S-BAHN';
+
+  if (
+    ['HIGHSPEED_RAIL', 'HIGH_SPEED_RAIL', 'LONG_DISTANCE'].includes(mode)
+  ) {
+    return 'FERN';
+  }
+
+  if (['REGIONAL_RAIL', 'REGIONAL_FAST_RAIL', 'RAIL'].includes(mode)) {
+    return 'BAHN';
+  }
+
+  return mode || 'UNKNOWN';
+}
+
+function normalizeDeparture(item) {
+  const place = item.place ?? {};
+  const epochMs = getEpoch(getRawTime(item));
+  const mode = item.mode || 'UNKNOWN';
+
+  return {
+    epochMs,
+    time: epochMs !== null ? formatLocalTime(epochMs, place.tz) : null,
+    timezone: place.tz || null,
+    stopName: place.name || 'Unbekannte Haltestelle',
+    stopId: place.stopId || null,
+    mode,
+    displayedMode: displayedMode(mode),
+    line: item.routeShortName || item.route?.shortName || '',
+    destination: item.headsign || item.tripTo || '',
+    status: item.cancelled
+      ? 'CANCELLED'
+      : item.realtime
+        ? 'REALTIME'
+        : 'SCHEDULED',
+    platform: place.platform || item.platform || '',
+  };
+}
+
+async function transitousQuery({ lat, lon, radius, stopId, n = 100 }) {
+  const params = new URLSearchParams({
+    n: String(n),
+    language: 'en',
+  });
+
+  if (stopId) {
+    params.set('stopId', stopId);
+  } else {
+    params.set('center', `${lat},${lon}`);
+    params.set('radius', String(radius));
+  }
+
+  const response = await fetch(`${API_URL}?${params}`, {
+    headers: {
+      'User-Agent': `${APP_NAME}/${APP_VERSION} (${CONTACT})`,
+      Accept: 'application/json',
+    },
+    signal: AbortSignal.timeout(15000),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Transitous API: HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  if (!Array.isArray(data.stopTimes)) {
+    throw new Error('Transitous-Antwort enthält keine stopTimes-Liste');
+  }
+
+  return data.stopTimes;
+}
+
+/**
+ * Liefert die nächsten Abfahrten im Umkreis eines Standorts.
+ *
+ * lat: Breitengrad
+ * lon: Längengrad
+ * radius: Suchradius in Metern
+ * count: Anzahl der Abfahrten (5 bis 10)
+ */
+export async function getDepartures({
+  lat,
+  lon,
+  radius = 2000,
+  count = 5,
+}) {
+  if (
+    !Number.isFinite(Number(lat)) ||
+    Number(lat) < -90 ||
+    Number(lat) > 90 ||
+    !Number.isFinite(Number(lon)) ||
+    Number(lon) < -180 ||
+    Number(lon) > 180
+  ) {
+    throw new Error('Bitte gültige Koordinaten für den Standort angeben.');
+  }
+
+  lat = Number(lat);
+  lon = Number(lon);
+  radius = Number(radius);
+  count = Number(count);
+
+  if (!Number.isFinite(radius) || radius < 1 || radius > 50000) {
+    throw new Error('Der Suchradius muss zwischen 1 und 50000 Metern liegen.');
+  }
+
+  if (!Number.isInteger(count) || count < 5 || count > 10) {
+    count = 5;
+  }
+
+  // 1. Haltestellen im gewählten Umkreis suchen.
+  const initial = await transitousQuery({
+    lat,
+    lon,
+    radius,
+    n: 100,
+  });
+
+  // 2. Die nächstgelegene Haltestelle jeder Kategorie auswählen.
+  const nearestByCategory = new Map();
+
+  for (const item of initial) {
+    const place = item.place || {};
+    const category = modeCategory(item.mode);
+
+    if (!category || !place.stopId) continue;
+
+    const stopLat = Number(place.lat);
+    const stopLon = Number(place.lon);
+
+    if (!Number.isFinite(stopLat) || !Number.isFinite(stopLon)) {
+      continue;
+    }
+
+    const distance = haversineMeters(lat, lon, stopLat, stopLon);
+    const previous = nearestByCategory.get(category);
+
+    if (!previous || distance < previous.distance) {
+      nearestByCategory.set(category, {
+        category,
+        stopId: place.stopId,
+        stopName: place.name || 'Unbekannte Haltestelle',
+        distance,
+      });
+    }
+  }
+
+  const selected = [...nearestByCategory.values()];
+
+  if (selected.length === 0) {
+    return {
+      stopsSelected: [],
+      departures: [],
+      attribution:
+        'Transitdaten: Transitous – https://transitous.org/sources/',
+    };
+  }
+
+  // 3. Abfahrten der ausgewählten Haltestellen gezielt abrufen.
+  const uniqueStops = [
+    ...new Map(selected.map((stop) => [stop.stopId, stop])).values(),
+  ];
+
+  const results = await Promise.all(
+    uniqueStops.map((stop) =>
+      transitousQuery({
+        lat,
+        lon,
+        radius,
+        stopId: stop.stopId,
+        n: 100,
+      }),
+    ),
+  );
+
+  // 4. Zeiten vereinheitlichen, vergangene Abfahrten entfernen
+  // und chronologisch sortieren.
+  const now = Date.now();
+
+  const normalized = results
+    .flat()
+    .map(normalizeDeparture)
+    .filter(
+      (item) =>
+        item.epochMs !== null &&
+        item.epochMs >= now - 60_000,
+    )
+    .sort((a, b) => a.epochMs - b.epochMs);
+
+  // 5. Doppelte Abfahrten entfernen und gewünschte Anzahl auswählen.
+  const seen = new Set();
+  const departures = [];
+
+  for (const item of normalized) {
+    const key = `${item.stopId}|${item.line}|${item.destination}|${item.epochMs}`;
+
+    if (seen.has(key)) continue;
+
+    seen.add(key);
+    departures.push(item);
+
+    if (departures.length >= count) break;
+  }
+
+  return {
+    query: { lat, lon, radius, count },
+    stopsSelected: selected.map((stop) => ({
+      category: stop.category,
+      name: stop.stopName,
+      stopId: stop.stopId,
+      distanceMeters: Math.round(stop.distance),
+    })),
+    departures,
+    attribution:
+      'Transitdaten: Transitous – https://transitous.org/sources/',
+  };
+}
+
