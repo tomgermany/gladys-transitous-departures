@@ -2,7 +2,7 @@
 const API_URL = 'https://api.transitous.org/api/v6/stoptimes';
 const APP_NAME = 'Gladys Transitous Departures';
 const APP_VERSION = '0.1.0';
-const CONTACT = 'https://github.com/tomgermany/gladys-transitous-departures';
+const DEFAULT_CONTACT = 'https://github.com/tomgermany/gladys-transitous-departures';
 
 function getEpoch(value) {
   if (typeof value === 'number') {
@@ -118,7 +118,14 @@ function normalizeDeparture(item) {
   };
 }
 
-async function transitousQuery({ lat, lon, radius, stopId, n = 100 }) {
+async function transitousQuery({
+  lat,
+  lon,
+  radius,
+  stopId,
+  n = 100,
+  contact = DEFAULT_CONTACT,
+}) {
   const params = new URLSearchParams({
     n: String(n),
     language: 'en',
@@ -133,7 +140,7 @@ async function transitousQuery({ lat, lon, radius, stopId, n = 100 }) {
 
   const response = await fetch(`${API_URL}?${params}`, {
     headers: {
-      'User-Agent': `${APP_NAME}/${APP_VERSION} (${CONTACT})`,
+      'User-Agent': `${APP_NAME}/${APP_VERSION} (${contact})`,
       Accept: 'application/json',
     },
     signal: AbortSignal.timeout(15000),
@@ -158,13 +165,15 @@ async function transitousQuery({ lat, lon, radius, stopId, n = 100 }) {
  * lat: Breitengrad
  * lon: Längengrad
  * radius: Suchradius in Metern
- * count: Anzahl der Abfahrten (5 bis 10)
+ * count: Anzahl der Abfahrten (5 bis 8)
  */
+
 export async function getDepartures({
   lat,
   lon,
   radius = 2000,
   count = 5,
+  contact = DEFAULT_CONTACT,
 }) {
   if (
     !Number.isFinite(Number(lat)) ||
@@ -186,17 +195,22 @@ export async function getDepartures({
     throw new Error('Der Suchradius muss zwischen 1 und 50000 Metern liegen.');
   }
 
-  if (!Number.isInteger(count) || count < 5 || count > 10) {
-    count = 5;
-  }
+  
+if (!Number.isInteger(count) || count < 5 || count > 8) {
+  count = 5;
+}
+
 
   // 1. Haltestellen im gewählten Umkreis suchen.
-  const initial = await transitousQuery({
-    lat,
-    lon,
-    radius,
-    n: 100,
-  });
+ 
+const initial = await transitousQuery({
+  lat,
+  lon,
+  radius,
+  n: 100,
+  contact,
+});
+
 
   // 2. Die nächstgelegene Haltestelle jeder Kategorie auswählen.
   const nearestByCategory = new Map();
@@ -245,13 +259,15 @@ export async function getDepartures({
 
   const results = await Promise.all(
     uniqueStops.map((stop) =>
-      transitousQuery({
-        lat,
-        lon,
-        radius,
-        stopId: stop.stopId,
-        n: 100,
-      }),
+        transitousQuery({
+          lat,
+          lon,
+          radius,
+          stopId: stop.stopId,
+          n: 100,
+          contact,
+        }),
+
     ),
   );
 
