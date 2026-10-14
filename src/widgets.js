@@ -23,6 +23,12 @@ function stopSummary(stops) {
   );
 }
 
+function getDepartureStopName(departure, stops) {
+  const stop = stops.find((item) => item.stopId === departure.stopId);
+
+  return stop?.name || departure.displayedMode;
+}
+
 export const WIDGETS = {
   [TRANSITOUS_DEPARTURES_WIDGET]: {
     async get(gladys, { settings = {} }) {
@@ -79,7 +85,7 @@ export const WIDGETS = {
 
             const destination = departure.destination || 'Ziel unbekannt';
 
-            const subtitleParts = [departure.displayedMode];
+            const subtitleParts = [getDepartureStopName(departure, result.stopsSelected)];
 
             if (departure.platform) {
               subtitleParts.push(`Steig ${departure.platform}`);
