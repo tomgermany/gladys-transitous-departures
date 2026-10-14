@@ -1,4 +1,3 @@
-
 const API_URL = 'https://api.transitous.org/api/v6/stoptimes';
 const APP_NAME = 'Gladys Transitous Departures';
 const APP_VERSION = '0.1.0';
@@ -43,9 +42,7 @@ function haversineMeters(lat1, lon1, lat2, lon2) {
 
   const a =
     Math.sin(dLat / 2) ** 2 +
-    Math.cos(radians(lat1)) *
-      Math.cos(radians(lat2)) *
-      Math.sin(dLon / 2) ** 2;
+    Math.cos(radians(lat1)) * Math.cos(radians(lat2)) * Math.sin(dLon / 2) ** 2;
 
   return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
@@ -81,9 +78,7 @@ function displayedMode(mode) {
   if (mode === 'SUBWAY') return 'U-BAHN';
   if (mode === 'SUBURBAN') return 'S-BAHN';
 
-  if (
-    ['HIGHSPEED_RAIL', 'HIGH_SPEED_RAIL', 'LONG_DISTANCE'].includes(mode)
-  ) {
+  if (['HIGHSPEED_RAIL', 'HIGH_SPEED_RAIL', 'LONG_DISTANCE'].includes(mode)) {
     return 'FERN';
   }
 
@@ -109,23 +104,12 @@ function normalizeDeparture(item) {
     displayedMode: displayedMode(mode),
     line: item.routeShortName || item.route?.shortName || '',
     destination: item.headsign || item.tripTo || '',
-    status: item.cancelled
-      ? 'CANCELLED'
-      : item.realtime
-        ? 'REALTIME'
-        : 'SCHEDULED',
+    status: item.cancelled ? 'CANCELLED' : item.realtime ? 'REALTIME' : 'SCHEDULED',
     platform: place.platform || item.platform || '',
   };
 }
 
-async function transitousQuery({
-  lat,
-  lon,
-  radius,
-  stopId,
-  n = 100,
-  contact = DEFAULT_CONTACT,
-}) {
+async function transitousQuery({ lat, lon, radius, stopId, n = 100, contact = DEFAULT_CONTACT }) {
   const params = new URLSearchParams({
     n: String(n),
     language: 'en',
@@ -195,22 +179,19 @@ export async function getDepartures({
     throw new Error('Der Suchradius muss zwischen 1 und 50000 Metern liegen.');
   }
 
-  
-if (!Number.isInteger(count) || count < 5 || count > 8) {
-  count = 5;
-}
-
+  if (!Number.isInteger(count) || count < 5 || count > 8) {
+    count = 5;
+  }
 
   // 1. Haltestellen im gewählten Umkreis suchen.
- 
-const initial = await transitousQuery({
-  lat,
-  lon,
-  radius,
-  n: 100,
-  contact,
-});
 
+  const initial = await transitousQuery({
+    lat,
+    lon,
+    radius,
+    n: 100,
+    contact,
+  });
 
   // 2. Die nächstgelegene Haltestelle jeder Kategorie auswählen.
   const nearestByCategory = new Map();
@@ -247,27 +228,23 @@ const initial = await transitousQuery({
     return {
       stopsSelected: [],
       departures: [],
-      attribution:
-        'Transitdaten: Transitous – https://transitous.org/sources/',
+      attribution: 'Transitdaten: Transitous – https://transitous.org/sources/',
     };
   }
 
   // 3. Abfahrten der ausgewählten Haltestellen gezielt abrufen.
-  const uniqueStops = [
-    ...new Map(selected.map((stop) => [stop.stopId, stop])).values(),
-  ];
+  const uniqueStops = [...new Map(selected.map((stop) => [stop.stopId, stop])).values()];
 
   const results = await Promise.all(
     uniqueStops.map((stop) =>
-        transitousQuery({
-          lat,
-          lon,
-          radius,
-          stopId: stop.stopId,
-          n: 100,
-          contact,
-        }),
-
+      transitousQuery({
+        lat,
+        lon,
+        radius,
+        stopId: stop.stopId,
+        n: 100,
+        contact,
+      }),
     ),
   );
 
@@ -278,11 +255,7 @@ const initial = await transitousQuery({
   const normalized = results
     .flat()
     .map(normalizeDeparture)
-    .filter(
-      (item) =>
-        item.epochMs !== null &&
-        item.epochMs >= now - 60_000,
-    )
+    .filter((item) => item.epochMs !== null && item.epochMs >= now - 60_000)
     .sort((a, b) => a.epochMs - b.epochMs);
 
   // 5. Doppelte Abfahrten entfernen und gewünschte Anzahl auswählen.
@@ -309,8 +282,6 @@ const initial = await transitousQuery({
       distanceMeters: Math.round(stop.distance),
     })),
     departures,
-    attribution:
-      'Transitdaten: Transitous – https://transitous.org/sources/',
+    attribution: 'Transitdaten: Transitous – https://transitous.org/sources/',
   };
 }
-

@@ -2,76 +2,73 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { validateWidgetContent } from '@gladysassistant/integration-sdk';
 import { createFakeGladys } from '@gladysassistant/integration-sdk/testing';
-import { buildDiscoveredDevices } from '../src/devices/index.js';
-import { simulateLanSession } from '../src/devices/plug.js';
-import { DEMO_STATUS_WIDGET, WIDGETS, refreshWidgets } from '../src/widgets.js';
-import { normalizeConfig } from '../src/config.js';
+import { TRANSITOUS_DEPARTURES_WIDGET, WIDGETS, refreshWidgets } from '../src/widgets.js';
 
 const gladys = createFakeGladys();
-const config = normalizeConfig();
-const demoStatus = WIDGETS[DEMO_STATUS_WIDGET];
+const widget = WIDGETS[TRANSITOUS_DEPARTURES_WIDGET];
 
-// What the SDK passes to onWidgetGet, plus the config index.js adds.
-const getContent = (cfg = config) =>
-  demoStatus.get(gladys, { settings: {}, language: 'en', units: 'metric', config: cfg });
+const getContent = (settings = {}) =>
+  widget.get(gladys, {
+    settings,
+    language: 'de',
+    units: 'metric',
+    config: {},
+  });
 
-test('the demo_status content is rendered exactly as sent', async () => {
-  // [] = nothing the core would drop, truncate or trim to the content budget.
-  assert.deepEqual(validateWidgetContent(await getContent()), []);
+test('the Transitous widget is registered', () => {
+  assert.ok(widget, 'transitous_departures must be registered');
+  assert.equal(typeof widget.get, 'function');
 });
 
-test('the degraded plug connection content is valid too', async () => {
-  simulateLanSession(false);
-  try {
-    const content = await getContent();
-    assert.deepEqual(validateWidgetContent(content), []);
-    const status = content.components.find((component) => component.type === 'status');
+test('missing coordinates produce a helpful message', async () => {
+  const content = await getContent();
+
+  assert.deepEqual(validateWidgetContent(content), []);
+  assert.ok(
+    content.components.some((component) => component.text?.includes('Breitengrad und Längengrad')),
+    'the user is asked to enter coordinates',
+  );
+  assert.ok(
+    !content.components.some((component) => component.type === 'card-list'),
+    'no departure list is shown without coordinates',
+  );
+});
+
+test('invalid coordinates are rejected without fetching departures', async () => {
+  for (const settings of [
+    { latitude: '', longitude: '8.69' },
+    { latitude: '91', longitude: '8.69' },
+    { latitude: '49.35', longitude: '-181' },
+    { latitude: 'not-a-number', longitude: '8.69' },
+  ]) {
+    const content = await getContent(settings);
+
     assert.ok(
-      status.items.some((item) => item.color === 'warning'),
-      'degraded shows a warning',
+      content.components.some((component) =>
+        component.text?.includes('Breitengrad und Längengrad'),
+      ),
+      `invalid coordinates should be rejected: ${JSON.stringify(settings)}`,
     );
-  } finally {
-    simulateLanSession(true);
+    assert.ok(!content.components.some((component) => component.type === 'card-list'));
   }
 });
 
-test('the live tiles reference features the integration publishes', async () => {
-  const featureIds = new Set(
-    buildDiscoveredDevices(gladys, config).flatMap((device) =>
-      device.features.map((feature) => feature.external_id),
-    ),
-  );
-  const liveTiles = (await getContent()).components.filter((c) => c.device_feature);
-  assert.ok(liveTiles.length > 0, 'the template demonstrates a device-bound tile');
-  for (const tile of liveTiles) {
-    assert.ok(featureIds.has(tile.device_feature), `unknown feature ${tile.device_feature}`);
-  }
+test('widget refresh interval stays within the supported limits', async () => {
+  const tooShort = await getContent({
+    refresh_minutes: 1,
+  });
+  const tooLong = await getContent({
+    refresh_minutes: 120,
+  });
+
+  assert.equal(tooShort.ttl_seconds, 600);
+  assert.equal(tooLong.ttl_seconds, 3600);
 });
 
-test('every button action of the content is handled and answers a short toast', async () => {
-  const buttons = (await getContent()).components.filter((c) => c.type === 'button' && c.action);
-  assert.ok(buttons.length > 0, 'the template demonstrates a widget action');
-  for (const { action } of buttons) {
-    const message = await demoStatus.action(gladys, {
-      actionKey: action.key,
-      params: action.params ?? {},
-      settings: {},
-      config,
-    });
-    assert.ok(message.en, 'the toast carries at least the mandatory `en` text');
-    assert.ok(message.en.length <= 200, 'toasts are capped at 200 characters');
-  }
-});
-
-test('an unknown widget action fails, so the user sees the error', async () => {
-  await assert.rejects(
-    demoStatus.action(gladys, { actionKey: 'unknown', params: {}, settings: {}, config }),
-    /Unknown widget action/,
-  );
-});
-
-test('refreshWidgets nudges every widget', () => {
+test('refreshWidgets nudges every registered widget', () => {
   const fresh = createFakeGladys();
+
   refreshWidgets(fresh);
+
   assert.deepEqual(fresh.fake.widgetRefreshes, Object.keys(WIDGETS));
 });

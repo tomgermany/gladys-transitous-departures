@@ -1,4 +1,3 @@
-
 import { getDepartures } from './transitous.js';
 
 export const TRANSITOUS_DEPARTURES_WIDGET = 'transitous_departures';
@@ -19,12 +18,7 @@ function stopSummary(stops) {
   if (!stops.length) return 'Keine Haltestelle gefunden';
 
   return shortText(
-    stops
-      .map(
-        (stop) =>
-          `${stop.name} (${stop.category}, ${stop.distanceMeters} m)`,
-      )
-      .join(' · '),
+    stops.map((stop) => `${stop.name} (${stop.category}, ${stop.distanceMeters} m)`).join(' · '),
     80,
   );
 }
@@ -38,14 +32,9 @@ export const WIDGETS = {
       const count = Number(settings.count ?? 5);
       const refreshMinutes = Number(settings.refresh_minutes ?? 30);
 
-      const ttlSeconds = Math.min(
-        3600,
-        Math.max(600, refreshMinutes * 60),
-      );
+      const ttlSeconds = Math.min(3600, Math.max(600, refreshMinutes * 60));
 
-      const components = [
-        text('ÖPNV-Abfahrten in der Nähe', 'heading'),
-      ];
+      const components = [text('ÖPNV-Abfahrten in der Nähe', 'heading')];
 
       if (
         settings.latitude === undefined ||
@@ -60,15 +49,13 @@ export const WIDGETS = {
         longitude > 180
       ) {
         components.push(
-          text(
-            'Bitte öffne die Widget-Einstellungen und trage Breitengrad und Längengrad ein.',
-          ),
+          text('Bitte öffne die Widget-Einstellungen und trage Breitengrad und Längengrad ein.'),
         );
 
         return { ttl_seconds: ttlSeconds, components };
       }
 
-       try {
+      try {
         const result = await getDepartures({
           lat: latitude,
           lon: longitude,
@@ -80,9 +67,7 @@ export const WIDGETS = {
         components.push(text(stopSummary(result.stopsSelected), 'caption'));
 
         if (!result.departures.length) {
-          components.push(
-            text('Im gewählten Umkreis wurden keine Abfahrten gefunden.'),
-          );
+          components.push(text('Im gewählten Umkreis wurden keine Abfahrten gefunden.'));
           return { ttl_seconds: ttlSeconds, components };
         }
 
@@ -90,9 +75,7 @@ export const WIDGETS = {
           type: 'card-list',
           display: 'list',
           items: result.departures.slice(0, 8).map((departure) => {
-            const line = departure.line
-              ? `Linie ${departure.line}`
-              : departure.displayedMode;
+            const line = departure.line ? `Linie ${departure.line}` : departure.displayedMode;
 
             const destination = departure.destination || 'Ziel unbekannt';
 
@@ -103,10 +86,7 @@ export const WIDGETS = {
             }
 
             const item = {
-              title: shortText(
-                `${departure.time ?? '--:--'} · ${line} → ${destination}`,
-                60,
-              ),
+              title: shortText(`${departure.time ?? '--:--'} · ${line} → ${destination}`, 60),
               subtitle: shortText(subtitleParts.join(' · '), 60),
             };
 
@@ -127,11 +107,9 @@ export const WIDGETS = {
         });
 
         return { ttl_seconds: ttlSeconds, components };
-      } catch (error) {
+      } catch {
         components.push(
-          text(
-            'Die Abfahrten konnten gerade nicht geladen werden. Bitte später erneut versuchen.',
-          ),
+          text('Die Abfahrten konnten gerade nicht geladen werden. Bitte später erneut versuchen.'),
         );
 
         return { ttl_seconds: ttlSeconds, components };
