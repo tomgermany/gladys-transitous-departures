@@ -4,18 +4,14 @@
   "name": "Transitous Departures",
   "description": {
     "en": "Nearby public transport departures on the Gladys dashboard, powered by Transitous.",
-    "de": "Abfahrten des öffentlichen Nahverkehrs in der Nähe direkt im Gladys-Dashboard, bereitgestellt von Transitous.",
+    "de": "ÖPNV-Abfahrten in der Nähe im Gladys-Dashboard, bereitgestellt von Transitous.",
     "fr": "Départs des transports publics à proximité sur le tableau de bord Gladys, grâce à Transitous."
   },
   "version": "1.0.0",
   "docker_image": "ghcr.io/tomgermany/gladys-transitous-departures:1.0.0",
   "gladys_version": ">=5.1.0",
-  "categories": [
-    "services"
-  ],
-  "transports": [
-    "cloud"
-  ],
+  "categories": ["services"],
+  "transports": ["cloud"],
   "widgets": [
     {
       "key": "transitous_departures",
