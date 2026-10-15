@@ -103,8 +103,9 @@ export const WIDGETS = {
                 )?.name || departure.displayedMode;
 
              
+
             return {
-              type: 'value',
+                type: 'value',
                 value: shortText(
                   `${departure.time ?? '--:--'} · ${line}`,
                   24,
@@ -112,10 +113,25 @@ export const WIDGETS = {
                 label: shortText(
                   `${stopName}»${departure.destination || 'Ziel unbekannt'}`,
                   24,
-                ),
-                icon: 'bus',
-                  color: cancelled ? 'danger' : lineColor,
-              };
+                  ),
+                icon: ({
+                  BUS: 'bus',
+                  ODM: 'bus',
+                  FERRY: 'ship',
+                  FUNICULAR: 'maximize-2',
+                  TRAM: 'train',
+                  SUBWAY: 'train',
+                  RAIL: 'train',
+                  REGIONAL_RAIL: 'train',
+                  REGIONAL_FAST_RAIL: 'train',
+                  SUBURBAN: 'train',
+                  HIGHSPEED_RAIL: 'train',
+                  HIGH_SPEED_RAIL: 'train',
+                  LONG_DISTANCE: 'train',
+                  NIGHT_RAIL: 'train',
+                })[departure.mode] || 'bus',
+                color: cancelled ? 'danger' : lineColor,
+            };
           }),
         );
 
