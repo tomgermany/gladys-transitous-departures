@@ -81,7 +81,7 @@ export const WIDGETS = {
           type: 'card-list',
           display: 'list',
           items: result.departures.slice(0, 8).map((departure) => {
-            const line = departure.line ? `Linie ${departure.line}` : departure.displayedMode;
+            const line = departure.line || departure.displayedMode;
 
             const destination = departure.destination || 'Ziel unbekannt';
 
