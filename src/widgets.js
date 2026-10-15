@@ -84,7 +84,8 @@ export const WIDGETS = {
 
         components.push({
           type: 'card-list',
-          display: 'list',
+          //display: 'list',
+          display: 'grid',
           items: result.departures.slice(0, 8).map((departure) => {
             const line = departure.line || departure.displayedMode;
 
