@@ -165,9 +165,9 @@ export const WIDGETS = {
             return {
                 type: 'value',
                 value: shortText(
-                      `${departure.time ?? '--:--'} · ${line}`,
-                      24,
-                  ),
+  `                ${departure.time ?? '--:--'}${line.replace(/\s+/g, '')}`,
+                  12,
+                ),
                 label: departureLabel(stopName, departure.destination),
                 icon: ({
                   BUS: 'bus',
