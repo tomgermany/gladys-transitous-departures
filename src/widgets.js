@@ -81,7 +81,25 @@ export const WIDGETS = {
           type: 'card-list',
           display: 'list',
           items: result.departures.slice(0, 8).map((departure) => {
-            const line = departure.line || departure.displayedMode;
+            const line = departure.line || departure.displayedMode;            
+            
+            const lineColor =
+              departure.mode === 'BUS' || departure.mode === 'ODM'
+                ? 'success'
+                : ['TRAM', 'SUBWAY'].includes(departure.mode)
+                  ? 'warning'
+                  : [
+                      'RAIL',
+                      'REGIONAL_RAIL',
+                      'REGIONAL_FAST_RAIL',
+                      'SUBURBAN',
+                      'HIGHSPEED_RAIL',
+                      'HIGH_SPEED_RAIL',
+                      'LONG_DISTANCE',
+                      'NIGHT_RAIL',
+                    ].includes(departure.mode)
+                    ? 'info'
+                    : 'primary';
 
             const destination = departure.destination || 'Ziel unbekannt';
 
@@ -92,7 +110,7 @@ export const WIDGETS = {
             }
 
             const item = {
-              title: shortText(`${departure.time ?? '--:--'} · ${line} → ${destination}`, 60),
+              title: shortText(`${departure.time ?? '--:--'} · ${destination}`, 60),
               subtitle: shortText(subtitleParts.join(' · '), 60),
             };
 
@@ -106,8 +124,13 @@ export const WIDGETS = {
                 text: 'Echtzeit',
                 color: 'success',
               };
+            } else {
+              item.badge = {
+                text: shortText(line, 16),
+                color: lineColor,
+              };
             }
-
+            
             return item;
           }),
         });
