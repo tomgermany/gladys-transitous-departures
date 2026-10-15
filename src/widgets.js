@@ -97,12 +97,7 @@ export const WIDGETS = {
 
             const cancelled = departure.status === 'CANCELLED';
 
-            const stopName =
-                result.stopsSelected.find(
-                  (stop) => stop.stopId === departure.stopId,
-                )?.name || departure.displayedMode;
-
-             
+            const stopName = departure.stopName || 'Unbekannte Haltestelle';
 
             return {
                 type: 'value',
