@@ -137,19 +137,6 @@ async function transitousQuery({ lat, lon, radius, stopId, n = 100, contact = DE
 
   const data = await response.json();
 
-  
-  // DEBUG: Die ersten drei Abfahrten der API-Antwort protokollieren.
-  // Nach dem Test wieder entfernen.
-  console.log(
-    '[DEBUG Transitous] Erste drei Abfahrten:',
-    JSON.stringify(
-      (data.stopTimes || []).slice(0, 3),
-      null,
-      2,
-    ),
-  );
-
-
   if (!Array.isArray(data.stopTimes)) {
     throw new Error('Transitous-Antwort enthält keine stopTimes-Liste');
   }
