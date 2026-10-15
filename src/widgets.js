@@ -24,12 +24,6 @@ function stopSummary(stops) {
   );
 }
 
-function getDepartureStopName(departure, stops) {
-  const stop = stops.find((item) => item.stopId === departure.stopId);
-
-  return stop?.name || departure.displayedMode;
-}
-
 export const WIDGETS = {
   [TRANSITOUS_DEPARTURES_WIDGET]: {
     async get(gladys, { settings = {} }) {
@@ -82,7 +76,6 @@ export const WIDGETS = {
           return { ttl_seconds: ttlSeconds, components };
         }
 
-        
         components.push(
           ...result.departures.slice(0, 6).map((departure) => {
             const line = departure.line || departure.displayedMode;
@@ -102,23 +95,24 @@ export const WIDGETS = {
               NIGHT_RAIL: 'info',
             }[departure.mode] || 'primary';
 
-            const destination = shortText(
-              departure.destination || 'Ziel unbekannt',
-              24,
-            );
-
             const cancelled = departure.status === 'CANCELLED';
 
             return {
               type: 'value',
-              value: cancelled ? 'ENTFÄLLT' : (departure.time ?? '--:--'),
-              label: destination,
-              icon: line,
+              value: cancelled
+                ? 'ENTFÄLLT'
+                : (departure.time ?? '--:--'),
+              label: shortText(
+                cancelled
+                  ? line
+                  : `${line} · ${departure.destination || 'Ziel unbekannt'}`,
+                24,
+              ),
+              icon: 'bus',
               color: cancelled ? 'danger' : lineColor,
             };
           }),
         );
-
 
         return { ttl_seconds: ttlSeconds, components };
       } catch {
