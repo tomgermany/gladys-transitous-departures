@@ -105,22 +105,22 @@ export const WIDGETS = {
                       `${departure.time ?? '--:--'} · ${line}`,
                       24,
                   ),
-                  label: (() => {
-                          const stop = stopName || 'Unbekannte Haltestelle';
-                          const destination = departure.destination || 'Ziel unbekannt';
-                          const separator = '»';
-                          const maxLength = 24;
+label: (() => {
+  const stop = stopName || 'Unbekannte Haltestelle';
+  const destination = departure.destination || 'Ziel unbekannt';
+  const maxLength = 24;
+  const separator = '»';
 
-                           const destinationLength = Math.min(
-                                  destination.length,
-                                   Math.floor((maxLength - separator.length) * 0.7),
-                    );
-                    
-  const shortDestination = shortText(destination, destinationLength);
-  const remaining = maxLength - shortDestination.length - separator.length;
-  const shortStop = shortText(stop, remaining);
+  const destinationText = destination.slice(
+    0,
+    Math.min(destination.length, 16),
+  );
+  const stopLength = Math.max(
+    0,
+    maxLength - destinationText.length - separator.length,
+  );
 
-  return `${shortStop}${separator}${shortDestination}`;
+  return `${stop.slice(0, stopLength)}${separator}${destinationText}`;
 })(),
                 icon: ({
                   BUS: 'bus',
