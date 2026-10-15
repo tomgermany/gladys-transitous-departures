@@ -106,11 +106,22 @@ export const WIDGETS = {
                       24,
                   ),
                   label: (() => {
-                        const shortStop = shortText(stopName, 10);
-                        const destination = departure.destination || 'Ziel unbekannt';
-                        const remaining = Math.max(0, 24 - shortStop.length - 1);
-                        return `${shortStop}»${shortText(destination, remaining)}`;
-                  })(),
+                          const stop = stopName || 'Unbekannte Haltestelle';
+                          const destination = departure.destination || 'Ziel unbekannt';
+                          const separator = '»';
+                          const maxLength = 24;
+
+                           const destinationLength = Math.min(
+                                  destination.length,
+                                   Math.floor((maxLength - separator.length) * 0.7),
+                    );
+                    
+  const shortDestination = shortText(destination, destinationLength);
+  const remaining = maxLength - shortDestination.length - separator.length;
+  const shortStop = shortText(stop, remaining);
+
+  return `${shortStop}${separator}${shortDestination}`;
+})(),
                 icon: ({
                   BUS: 'bus',
                   ODM: 'bus',
