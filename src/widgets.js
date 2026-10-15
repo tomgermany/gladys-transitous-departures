@@ -82,11 +82,9 @@ export const WIDGETS = {
           return { ttl_seconds: ttlSeconds, components };
         }
 
-        components.push({
-          type: 'card-list',
-          //display: 'list',
-          display: 'grid',
-          items: result.departures.slice(0, 8).map((departure) => {
+        
+        components.push(
+          ...result.departures.slice(0, 6).map((departure) => {
             const line = departure.line || departure.displayedMode;
 
             const lineColor = {
@@ -104,44 +102,23 @@ export const WIDGETS = {
               NIGHT_RAIL: 'info',
             }[departure.mode] || 'primary';
 
-            const destination = departure.destination || 'Ziel unbekannt';
+            const destination = shortText(
+              departure.destination || 'Ziel unbekannt',
+              24,
+            );
 
-            const subtitleParts = [
-              getDepartureStopName(departure, result.stopsSelected),
-            ];
+            const cancelled = departure.status === 'CANCELLED';
 
-            if (departure.platform) {
-              subtitleParts.push(`Steig ${departure.platform}`);
-            }
-
-            const item = {
-              title: shortText(
-                `${departure.time ?? '--:--'} · ${destination}`,
-                60,
-              ),
-              subtitle: shortText(subtitleParts.join(' · '), 60),
+            return {
+              type: 'value',
+              value: cancelled ? 'ENTFÄLLT' : (departure.time ?? '--:--'),
+              label: destination,
+              icon: line,
+              color: cancelled ? 'danger' : lineColor,
             };
-
-            if (departure.status === 'CANCELLED') {
-              item.badge = {
-                text: 'ENTFÄLLT',
-                color: 'danger',
-              };
-            } else if (departure.status === 'REALTIME') {
-              item.badge = {
-                text: 'Echtzeit',
-                color: 'success',
-              };
-            } else {
-              item.badge = {
-                text: shortText(line, 16),
-                color: lineColor,
-              };
-            }
-
-            return item;
           }),
-        });
+        );
+
 
         return { ttl_seconds: ttlSeconds, components };
       } catch {
