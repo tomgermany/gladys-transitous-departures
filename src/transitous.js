@@ -89,7 +89,8 @@ function displayedMode(mode) {
   return mode || 'UNKNOWN';
 }
 
-function normalizeDeparture(item) {
+
+function normalizeDeparture(item, selectedStopName) {
   const place = item.place ?? {};
   const epochMs = getEpoch(getRawTime(item));
   const mode = item.mode || 'UNKNOWN';
@@ -98,7 +99,7 @@ function normalizeDeparture(item) {
     epochMs,
     time: epochMs !== null ? formatLocalTime(epochMs, place.tz) : null,
     timezone: place.tz || null,
-    stopName: place.name || 'Unbekannte Haltestelle',
+    stopName: selectedStopName || place.name || 'Unbekannte Haltestelle',
     stopId: place.stopId || null,
     mode,
     displayedMode: displayedMode(mode),
@@ -235,28 +236,36 @@ export async function getDepartures({
   // 3. Abfahrten der ausgewählten Haltestellen gezielt abrufen.
   const uniqueStops = [...new Map(selected.map((stop) => [stop.stopId, stop])).values()];
 
-  const results = await Promise.all(
-    uniqueStops.map((stop) =>
-      transitousQuery({
-        lat,
-        lon,
-        radius,
-        stopId: stop.stopId,
-        n: 100,
-        contact,
-      }),
-    ),
-  );
+
+const results = await Promise.all(
+  uniqueStops.map(async (stop) => ({
+    stopName: stop.stopName,
+    stopTimes: await transitousQuery({
+      lat,
+      lon,
+      radius,
+      stopId: stop.stopId,
+      n: 100,
+      contact,
+    }),
+  })),
+);
+
 
   // 4. Zeiten vereinheitlichen, vergangene Abfahrten entfernen
   // und chronologisch sortieren.
   const now = Date.now();
 
-  const normalized = results
-    .flat()
-    .map(normalizeDeparture)
-    .filter((item) => item.epochMs !== null && item.epochMs >= now - 60_000)
-    .sort((a, b) => a.epochMs - b.epochMs);
+
+const normalized = results
+  .flatMap((result) =>
+    result.stopTimes.map((item) =>
+      normalizeDeparture(item, result.stopName),
+    ),
+  )
+  .filter((item) => item.epochMs !== null && item.epochMs >= now - 60_000)
+  .sort((a, b) => a.epochMs - b.epochMs);
+
 
   // 5. Doppelte Abfahrten entfernen und gewünschte Anzahl auswählen.
   const seen = new Set();
