@@ -102,19 +102,20 @@ export const WIDGETS = {
                   (stop) => stop.stopId === departure.stopId,
                 )?.name || departure.displayedMode;
 
+             
             return {
               type: 'value',
-              value: shortText(
-                `${departure.time ?? '--:--'} · ${departure.destination || 'Ziel unbekannt'}`,
-                24,
+                value: shortText(
+                  `${departure.time ?? '--:--'} · ${line}`,
+                  24,
                 ),
                 label: shortText(
-                  `${line} · ${stopName}`,
+                  `${stopName}»${departure.destination || 'Ziel unbekannt'}`,
                   24,
-                  ),
+                ),
                 icon: 'bus',
                   color: cancelled ? 'danger' : lineColor,
-                };
+              };
           }),
         );
 
