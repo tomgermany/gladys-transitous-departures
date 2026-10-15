@@ -97,20 +97,24 @@ export const WIDGETS = {
 
             const cancelled = departure.status === 'CANCELLED';
 
+            const stopName =
+                result.stopsSelected.find(
+                  (stop) => stop.stopId === departure.stopId,
+                )?.name || departure.displayedMode;
+
             return {
               type: 'value',
-              value: cancelled
-                ? 'ENTFÄLLT'
-                : (departure.time ?? '--:--'),
-              label: shortText(
-                cancelled
-                  ? line
-                  : `${line} · ${departure.destination || 'Ziel unbekannt'}`,
+              value: shortText(
+                `${departure.time ?? '--:--'} · ${departure.destination || 'Ziel unbekannt'}`,
                 24,
-              ),
-              icon: 'bus',
-              color: cancelled ? 'danger' : lineColor,
-            };
+                ),
+                label: shortText(
+                  `${line} · ${stopName}`,
+                  24,
+                  ),
+                icon: 'bus',
+                  color: cancelled ? 'danger' : lineColor,
+                };
           }),
         );
 
