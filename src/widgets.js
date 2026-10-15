@@ -1,3 +1,4 @@
+
 import { getDepartures } from './transitous.js';
 
 export const TRANSITOUS_DEPARTURES_WIDGET = 'transitous_departures';
@@ -55,7 +56,9 @@ export const WIDGETS = {
         longitude > 180
       ) {
         components.push(
-          text('Bitte öffne die Widget-Einstellungen und trage Breitengrad und Längengrad ein.'),
+          text(
+            'Bitte öffne die Widget-Einstellungen und trage Breitengrad und Längengrad ein.',
+          ),
         );
 
         return { ttl_seconds: ttlSeconds, components };
@@ -73,7 +76,9 @@ export const WIDGETS = {
         components.push(text(stopSummary(result.stopsSelected), 'caption'));
 
         if (!result.departures.length) {
-          components.push(text('Im gewählten Umkreis wurden keine Abfahrten gefunden.'));
+          components.push(
+            text('Im gewählten Umkreis wurden keine Abfahrten gefunden.'),
+          );
           return { ttl_seconds: ttlSeconds, components };
         }
 
@@ -81,36 +86,38 @@ export const WIDGETS = {
           type: 'card-list',
           display: 'list',
           items: result.departures.slice(0, 8).map((departure) => {
-            const line = departure.line || departure.displayedMode;            
-            
-            const lineColor =
-              departure.mode === 'BUS' || departure.mode === 'ODM'
-                ? 'success'
-                : ['TRAM', 'SUBWAY'].includes(departure.mode)
-                  ? 'warning'
-                  : [
-                      'RAIL',
-                      'REGIONAL_RAIL',
-                      'REGIONAL_FAST_RAIL',
-                      'SUBURBAN',
-                      'HIGHSPEED_RAIL',
-                      'HIGH_SPEED_RAIL',
-                      'LONG_DISTANCE',
-                      'NIGHT_RAIL',
-                    ].includes(departure.mode)
-                    ? 'info'
-                    : 'primary';
+            const line = departure.line || departure.displayedMode;
+
+            const lineColor = {
+              BUS: 'success',
+              ODM: 'success',
+              TRAM: 'warning',
+              SUBWAY: 'warning',
+              RAIL: 'info',
+              REGIONAL_RAIL: 'info',
+              REGIONAL_FAST_RAIL: 'info',
+              SUBURBAN: 'info',
+              HIGHSPEED_RAIL: 'info',
+              HIGH_SPEED_RAIL: 'info',
+              LONG_DISTANCE: 'info',
+              NIGHT_RAIL: 'info',
+            }[departure.mode] || 'primary';
 
             const destination = departure.destination || 'Ziel unbekannt';
 
-            const subtitleParts = [getDepartureStopName(departure, result.stopsSelected)];
+            const subtitleParts = [
+              getDepartureStopName(departure, result.stopsSelected),
+            ];
 
             if (departure.platform) {
               subtitleParts.push(`Steig ${departure.platform}`);
             }
 
             const item = {
-              title: shortText(`${departure.time ?? '--:--'} · ${destination}`, 60),
+              title: shortText(
+                `${departure.time ?? '--:--'} · ${destination}`,
+                60,
+              ),
               subtitle: shortText(subtitleParts.join(' · '), 60),
             };
 
@@ -130,7 +137,7 @@ export const WIDGETS = {
                 color: lineColor,
               };
             }
-            
+
             return item;
           }),
         });
@@ -138,7 +145,9 @@ export const WIDGETS = {
         return { ttl_seconds: ttlSeconds, components };
       } catch {
         components.push(
-          text('Die Abfahrten konnten gerade nicht geladen werden. Bitte später erneut versuchen.'),
+          text(
+            'Die Abfahrten konnten gerade nicht geladen werden. Bitte später erneut versuchen.',
+          ),
         );
 
         return { ttl_seconds: ttlSeconds, components };
