@@ -107,13 +107,15 @@ export const WIDGETS = {
             return {
                 type: 'value',
                 value: shortText(
-                  `${departure.time ?? '--:--'} · ${line}`,
-                  24,
-                ),
-                label: shortText(
-                  `${stopName}»${departure.destination || 'Ziel unbekannt'}`,
-                  24,
+                      `${departure.time ?? '--:--'} · ${line}`,
+                      24,
                   ),
+                  label: (() => {
+                        const shortStop = shortText(stopName, 10);
+                        const destination = departure.destination || 'Ziel unbekannt';
+                        const remaining = Math.max(0, 24 - shortStop.length - 1);
+                        return `${shortStop}»${shortText(destination, remaining)}`;
+                  })(),
                 icon: ({
                   BUS: 'bus',
                   ODM: 'bus',
