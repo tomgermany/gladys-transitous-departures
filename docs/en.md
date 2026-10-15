@@ -1,45 +1,24 @@
 # Transitous Depatures Integration for Gladys
 
+## You need:
+
+Gladys Assistent > Version 5.2
+External Integration Transitous Depatures
+
 ## Configuration
 
-1. Open the **Configuration** tab of the integration.
-2. Set the **latitude** and **longitude** the demo weather station should
-   observe (they default to Paris), and pick your temperature unit.
-   The **refresh interval** sets how often the weather station and the
-   plug's power are read: every 5 minutes by default, every minute at most.
-3. Save: the devices appear in the **Discovery** tab, ready to be added.
-
-The **Prefer the local connection** toggle drives the demo plug: it reports
-the channel it actually uses as a badge (local or cloud), with an orange dot
-when it runs degraded (local refused, cloud fallback).
-
-## Actions
-
-- **Test the weather provider** — performs a live request to Open-Meteo and
-  shows the current temperature and humidity under the button.
-- **Identify a device** — pick one of your devices in the list and it will
-  signal itself (the demo light "blinks" in the logs).
-
-## Scenes
-
-The integration adds its own cards to the scene editor (Gladys 5.1 or
-later), under the **Integrations** category:
-
-- **Motion detected** (trigger) — starts the scene when a demo motion sensor
-  sees something move. Optionally pick the sensor and what moved (person,
-  animal); left empty, any detection matches. The following actions can
-  read what moved with `{{triggerEvent.data.target}}`.
-- **Identify a device** (action) — makes the chosen device signal itself.
-  It returns whether the device could signal itself, so the following
-  actions can depend on it.
-
-## Dashboard
-
-Add the **Demo status** widget to a dashboard: it shows the live
-temperature of the weather station and the power of the office plug, the
-connection the plug currently uses (orange when degraded) and the observed
-location. Its **Identify the light** button makes the demo light signal
-itself.
+1. Install the Integration via Integrations under Gladys Assistant
+2. or ... install directly via Integrations and Top you find: Intall dirctly from Github.
+   use there: https://github.com/tomgermany/gladys-transitous-departures
+3. After Installation check that Integration is running.
+4. Open your Dashboard and go into Edit Modus and there add a new Widget.
+   Select this Integration Widget.
+5. You need the following information:
+   Set the **latitude** and **longitude** from depart
+   Set the Search Circle between 50 Meter and max. 2000 Meter
+   Set the **refresh interval** sets how often the weather station
+   Set a unique Name for the api
+7. Save: the widget appear on your screen
 
 ## Troubleshooting
 
