@@ -125,14 +125,13 @@ export const WIDGETS = {
           type: 'card-list',
           display: 'list',
           items: result.stopsSelected.slice(0, 8).map((stop) => ({
-                title: stop.name,
-                subtitle: `${stop.distanceMeters} m`,
-                badge: {
-                    text: stop.category,
-                    color: stop.category === 'BUS' ? 'success' : 'info',
-                    },
+              title: `${stop.distanceMeters} m · ${stop.name}`,
+              badge: {
+                  text: stop.category,
+                  color: stop.category === 'BUS' ? 'success' : 'info',
+                  },
                 })),
-            });
+          });
 } else {
   components.push(
     text('Im gewählten Umkreis wurden keine Haltestellen gefunden.'),
