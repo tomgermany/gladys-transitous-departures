@@ -15,7 +15,6 @@ function shortText(value, maxLength) {
   return `${result.slice(0, maxLength - 1)}…`;
 }
 
-
 export const WIDGETS = {
   [TRANSITOUS_DEPARTURES_WIDGET]: {
     async get(gladys, { settings = {}, language = 'de' }) {
