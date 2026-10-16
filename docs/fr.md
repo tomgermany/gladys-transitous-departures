@@ -6,6 +6,15 @@ Gladys Assistant > Version 5.2
 Intégration externe des départs en transit
 Accès Internet pour votre installation de Gladys Assistant
 
+Example:
+
+![Lissabon – Beispielansicht der Transitous-Integration](../test/lissabon.png)
+
+Résultat : six vignettes affichent dans un premier temps, une seule fois, l'arrêt le plus proche dans chaque catégorie. À savoir : l'arrêt de bus le plus proche, le ferry le plus proche, l'arrêt de transport ferroviaire le plus proche.
+Ensuite, le prochain départ depuis cet arrêt s'affiche.
+Cela signifie que s'il n'y a qu'un seul arrêt dans votre périmètre de recherche, vous obtiendrez les six prochains départs.
+Si plusieurs arrêts sont trouvés, ceux-ci s’affichent avec un code couleur.
+
 ## Vous obtenez :
 
 Vous recevrez une intégration externe pour Galdys Assistant. 
