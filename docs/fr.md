@@ -1,67 +1,41 @@
-# Template de démonstration
+# Transitous Intégration des départs en transit pour Gladys
 
-Ceci est la documentation utilisateur de l'intégration. Gladys ré-héberge ce
-fichier et affiche un lien **Documentation** permanent vers lui dans l'écran
-de configuration (dans la langue de l'utilisateur, avec l'anglais en repli) —
-c'est au moment de configurer que l'utilisateur en a le plus besoin. Gardez
-les courtes indications d'accueil dans les blocs `section` du `config_schema`
-du manifest ; mettez ici le pas-à-pas détaillé (captures d'écran, dépannage…).
+## Il vous faut :
 
-## Ce que vous obtenez
+Gladys Assistant > Version 5.2
+Intégration externe des départs en transit
+Accès Internet pour votre installation de Gladys Assistant
 
-Six appareils de démonstration apparaissent après l'installation : une
-station météo (vraies données Open-Meteo), un interrupteur, une lampe
-variable, une prise connectée avec mesure de puissance, un détecteur de
-mouvement et une caméra.
+## Vous obtenez :
+
+Vous recevrez une intégration externe pour Galdys Assistant. 
+Cette intégration affiche automatiquement les 6 prochains départs
+des transports en commun dans un widget clair et facile à lire,
+qu’il s’agisse de bus, de trains, de ferries ou de tramways.
+Le tout dans un rayon configurable autour de votre domicile.
 
 ## Configuration
 
-1. Ouvrez l'onglet **Configuration** de l'intégration.
-2. Renseignez la **latitude** et la **longitude** que la station météo de
-   démonstration doit observer (Paris par défaut), et choisissez votre unité
-   de température. L'**intervalle de rafraîchissement** règle la fréquence
-   de lecture de la station météo et de la puissance de la prise : toutes
-   les 5 minutes par défaut, toutes les minutes au plus.
-3. Enregistrez : les appareils apparaissent dans l'onglet **Découverte**,
-   prêts à être ajoutés.
-
-Le réglage **Préférer la connexion locale** pilote la prise de
-démonstration : elle affiche en badge le canal réellement utilisé (local ou
-cloud), avec un point orange quand elle fonctionne en mode dégradé (local
-refusé, bascule cloud).
-
-## Actions
-
-- **Tester le fournisseur météo** — effectue une requête en direct vers
-  Open-Meteo et affiche la température et l'humidité actuelles sous le
-  bouton.
-- **Identifier un appareil** — choisissez un de vos appareils dans la liste
-  et il se signale (la lampe de démonstration « clignote » dans les logs).
-
-## Scènes
-
-L'intégration ajoute ses propres cartes à l'éditeur de scènes (Gladys 5.1
-ou plus récent), dans la catégorie **Intégrations** :
-
-- **Mouvement détecté** (déclencheur) — lance la scène quand un détecteur
-  de démonstration voit bouger quelque chose. Choisissez éventuellement le
-  détecteur et ce qui a bougé (personne, animal) ; laissés vides, toute
-  détection correspond. Les actions suivantes peuvent lire ce qui a bougé
-  avec `{{triggerEvent.data.target}}`.
-- **Identifier un appareil** (action) — fait se signaler l'appareil choisi.
-  Elle indique si l'appareil a pu se signaler, pour que les actions
-  suivantes puissent en dépendre.
-
-## Tableau de bord
-
-Ajoutez le widget **État de la démo** à un tableau de bord : il affiche en
-direct la température de la station météo et la puissance de la prise du
-bureau, la connexion utilisée par la prise (en orange si dégradée) et la
-position observée. Son bouton **Identifier la lampe** fait se signaler la
-lampe de démonstration.
+1. Installez l'intégration externe soit via Gladys Assistant (recommandé),
+ soit dans Gladys Assistant avec un accès direct à GitHub.
+3. Une fois l'installation terminée, vérifiez que l'intégration fonctionne correctement.
+4. Ouvrez votre tableau de bord, passez en mode Édition, puis ajoutez-y le nouveau widget.
+   Sélectionnez ce widget d'intégration.
+5. Lorsque vous ajoutez le widget à votre tableau de bord, vous devrez fournir certaines informations :
+a.) Votre géolocalisation comme point de départ
+ (la prochaine phase de développement vous permettra d’importer des données depuis Gladys Assistant)
+b.) Le diamètre du rayon de recherche.
+c.) L’intervalle de rafraîchissement, par tranches de 10 minutes.
+d.) Un identifiant unique pour accéder à l’API sur https://transitous.org/.
+Cet identifiant doit être unique — par exemple, une adresse e-mail ou un site web.
+Il est enregistré par l'intégration uniquement dans le champ de configuration prévu à cet effet.
+L'intégration ne récupère ni ne consigne cet identifiant.
+Tout reste entre vos mains. Transitous.org utilise cet identifiant pour gérer la charge sur son infrastructure informatique.
+Tenez compte du fournisseur de données lorsque vous définissez ce paramètre. Nous recommandons une durée de 15 minutes.
+6. Après avoir renseigné ces informations, enregistrez-les et placez le widget à l'endroit de votre choix.
 
 ## Dépannage
 
-L'intégration journalise tout ce qu'elle fait : consultez les logs de
-l'intégration depuis l'interface Gladys (ou `docker logs` sur l'hôte) avec
-`LOG_LEVEL=debug` pour le détail complet.
+L'intégration consigne toutes ses opérations : consultez les journaux d'intégration depuis l'
+interface utilisateur de Gladys (ou via la commande `docker logs` sur l'hôte) avec l'option `LOG_LEVEL=debug` pour obtenir tous les
+détails.
