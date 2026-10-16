@@ -9,17 +9,39 @@ const text = (value, variant = 'body') => ({
   text: value,
 });
 
+
 const messages = {
   de: {
     heading: 'ÖPNV-Abfahrten in der Nähe',
+    houseLoadError: 'Die Koordinaten des ausgewählten Gladys-Hauses konnten nicht geladen werden.',
+    invalidLocation: 'Bitte wähle ein Gladys-Haus mit hinterlegten Koordinaten oder trage Breitengrad und Längengrad manuell ein.',
+    noStops: 'Im gewählten Umkreis wurden keine Haltestellen gefunden.',
+    noDepartures: 'Im gewählten Umkreis wurden keine Abfahrten gefunden.',
+    transitousError: 'Transitous ist momentan nicht erreichbar. Bitte prüfe deine Internetverbindung. Das Widget versucht es bei der nächsten Aktualisierung erneut.',
   },
   en: {
     heading: 'Public transport departures nearby',
+    houseLoadError: 'The coordinates of the selected Gladys house could not be loaded.',
+    invalidLocation: 'Please select a Gladys house with coordinates or enter latitude and longitude manually.',
+    noStops: 'No stops were found within the selected radius.',
+    noDepartures: 'No departures were found within the selected radius.',
+    transitousError: 'Transitous is currently unreachable. Please check your internet connection. The widget will try again at the next refresh.',
   },
   fr: {
     heading: 'Départs des transports en commun à proximité',
+    houseLoadError: 'Impossible de charger les coordonnées de la maison Gladys sélectionnée.',
+    invalidLocation: 'Veuillez sélectionner une maison Gladys avec des coordonnées ou saisir manuellement la latitude et la longitude.',
+    noStops: 'Aucun arrêt trouvé dans le rayon sélectionné.',
+    noDepartures: 'Aucun départ trouvé dans le rayon sélectionné.',
+    transitousError: 'Transitous est actuellement inaccessible. Vérifiez votre connexion Internet. Le widget réessaiera lors de la prochaine actualisation.',
   },
 };
+
+const getMessages = (language) => {
+  const lang = String(language).slice(0, 2).toLowerCase();
+  return messages[lang] || messages.de;
+};
+
 
 const getMessages = (language) => {
   const lang = String(language).slice(0, 2).toLowerCase();
@@ -78,7 +100,7 @@ export const WIDGETS = {
           }
         } catch {
           components.push(
-            text('Die Koordinaten des ausgewählten Gladys-Hauses konnten nicht geladen werden.'),
+            text(t.houseLoadError)
           );
           return { ttl_seconds: ttlSeconds, components };
         }
@@ -107,17 +129,7 @@ export const WIDGETS = {
         longitude > 180
       ) {
         
-        const locationMessage = {
-              de: 'Bitte wähle ein Gladys-Haus mit hinterlegten Koordinaten oder trage Breitengrad und Längengrad manuell ein.',
-              en: 'Please select a Gladys house with coordinates or enter latitude and longitude manually.',
-              fr: 'Veuillez sélectionner une maison Gladys avec des coordonnées ou saisir manuellement la latitude et la longitude.',
-              };
-
-      const lang = String(language).slice(0, 2).toLowerCase();
-
-      components.push(
-            text(locationMessage[lang] || locationMessage.de),
-      );
+        components.push(text(t.invalidLocation));
 
         return { ttl_seconds: ttlSeconds, components };
       }
@@ -146,13 +158,13 @@ export const WIDGETS = {
           });
 } else {
   components.push(
-    text('Im gewählten Umkreis wurden keine Haltestellen gefunden.'),
+    text(t.noStops)
   );
 }
 
         if (!result.departures.length) {
           components.push(
-            text('Im gewählten Umkreis wurden keine Abfahrten gefunden.'),
+            text(t.noDepartures)
           );
           return { ttl_seconds: ttlSeconds, components };
         }
@@ -208,17 +220,7 @@ export const WIDGETS = {
 
         return { ttl_seconds: ttlSeconds, components };
       } catch {
-        const errorMessage = {
-          de: 'Transitous ist momentan nicht erreichbar. Bitte prüfe deine Internetverbindung. Das Widget versucht es bei der nächsten Aktualisierung erneut.',
-          en: 'Transitous is currently unreachable. Please check your internet connection. The widget will try again at the next refresh.',
-          fr: 'Transitous est actuellement inaccessible. Vérifiez votre connexion Internet. Le widget réessaiera lors de la prochaine actualisation.',
-        };
-
-        const lang = String(language).slice(0, 2).toLowerCase();
-
-        components.push(
-          text(errorMessage[lang] || errorMessage.de),
-        );
+        components.push(text(t.transitousError));
 
         return { ttl_seconds: ttlSeconds, components };
       }
