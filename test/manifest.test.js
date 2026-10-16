@@ -119,9 +119,9 @@ test('the Transitous departure count uses valid static options', () => {
   assert.equal(countField.source, undefined);
   assert.deepEqual(
     countField.options.map((option) => option.value),
-    ['5', '6', '7', '8'],
+    ['3', '6'],
   );
-  assert.equal(countField.default, '5');
+  assert.equal(countField.default, '6');
 });
 
 test('the manifest version is the package version, and the image is tagged with it', () => {
