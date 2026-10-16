@@ -12,6 +12,10 @@ You'll receive an external integration for Galdys Assistant.
 This integration automatically displays the next 6 public transportation departures in a clear, easy-to-read widget—from buses to trains, ferries, and cable cars.
 All of this within a configurable radius around your home.
 
+Example:
+
+![Heidelberg – Beispielansicht der Transitous-Integration](../test/heidelberg.png)
+
 ## Configuration
 
 1. Install the external integration either through Gladys Assistant (recommended)
