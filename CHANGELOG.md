@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-10-16
+
 ## [1.4.2] - 2026-10-16
 
 ## [1.4.1] - 2026-10-16
@@ -96,7 +98,8 @@ the notes of the version's GitHub Release.
   the previous tag, which may not exist on the registry. Sub-containers on a
   third-party image (a broker, a database...) keep theirs.
 
-[Unreleased]: https://github.com/tomgermany/gladys-transitous-departures/compare/v1.4.2...HEAD
+[Unreleased]: https://github.com/tomgermany/gladys-transitous-departures/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/tomgermany/gladys-transitous-departures/compare/v1.4.2...v1.5.0
 [1.4.2]: https://github.com/tomgermany/gladys-transitous-departures/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/tomgermany/gladys-transitous-departures/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/tomgermany/gladys-transitous-departures/compare/v1.3.3...v1.4.0
