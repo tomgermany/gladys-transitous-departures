@@ -43,12 +43,6 @@ const getMessages = (language) => {
 };
 
 
-const getMessages = (language) => {
-  const lang = String(language).slice(0, 2).toLowerCase();
-  return messages[lang] || messages.de;
-};
-
-
 function shortText(value, maxLength) {
   const result = String(value ?? '').trim();
   if (result.length <= maxLength) return result;
