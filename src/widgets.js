@@ -76,17 +76,6 @@ function departureLabel(stopName, destination) {
   return `${cleanStop}${separator}${cleanTarget}`.slice(0, maxLength);
 }
 
-
-
-function stopSummary(stops) {
-  if (!stops.length) return 'Keine Haltestelle gefunden';
-
-  return shortText(
-    stops.map((stop) => `${stop.category} ${stop.distanceMeters} m`).join(' · '),
-    80,
-  );
-}
-
 export const WIDGETS = {
   [TRANSITOUS_DEPARTURES_WIDGET]: {
     async get(gladys, { settings = {} }) {
@@ -130,19 +119,25 @@ export const WIDGETS = {
           contact: settings.contact || undefined,
         });
 
-        // card list für die Badge, Entfernung, Haltestellenname
-        components.push({
+        // Card-list für Badge, Entfernung und Haltestellenname
+        if (result.stopsSelected.length > 0) {
+          components.push({
           type: 'card-list',
           display: 'list',
           items: result.stopsSelected.slice(0, 8).map((stop) => ({
-              title: stop.name,
-              subtitle: `${stop.distanceMeters} m`,
-              badge: {
-                text: stop.category,
-                color: stop.category === 'BUS' ? 'success' : 'info',
-                },
-            })),
-          });
+                title: stop.name,
+                subtitle: `${stop.distanceMeters} m`,
+                badge: {
+                    text: stop.category,
+                    color: stop.category === 'BUS' ? 'success' : 'info',
+                    },
+                })),
+            });
+} else {
+  components.push(
+    text('Im gewählten Umkreis wurden keine Haltestellen gefunden.'),
+  );
+}
 
         if (!result.departures.length) {
           components.push(
