@@ -18,8 +18,9 @@ function shortText(value, maxLength) {
 export const WIDGETS = {
   [TRANSITOUS_DEPARTURES_WIDGET]: {
     async get(gladys, { settings = {}, language = 'de' }) {
-      const latitude = Number(settings.latitude);
-      const longitude = Number(settings.longitude);
+      let latitude;
+      let longitude;
+
       const radius = Number(settings.radius ?? 2000);
       const count = Number(settings.count ?? 6);
       const refreshMinutes = Number(settings.refresh_minutes ?? 30);
@@ -28,11 +29,57 @@ export const WIDGETS = {
 
       const components = [text('ÖPNV-Abfahrten in der Nähe', 'heading')];
 
+      if (settings.house) {
+        try {
+          const response = await fetch(
+            `${process.env.GLADYS_HOST_API_URL}/api/integration/v1/house`,
+            {
+              headers: {
+                Authorization: `Bearer ${process.env.GLADYS_INTEGRATION_TOKEN}`,
+              },
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error('Häuser konnten nicht geladen werden.');
+          }
+
+          const houses = await response.json();
+          const house = houses.find((item) => item.selector === settings.house);
+
+          if (
+              house &&
+              house.latitude !== null &&
+              house.latitude !== undefined &&
+              house.longitude !== null &&
+              house.longitude !== undefined
+              ) {
+              latitude = Number(house.latitude);
+              longitude = Number(house.longitude);
+          }
+        } catch {
+          components.push(
+            text('Die Koordinaten des ausgewählten Gladys-Hauses konnten nicht geladen werden.'),
+          );
+          return { ttl_seconds: ttlSeconds, components };
+        }
+      } else {
+          latitude =
+          settings.latitude === undefined ||
+          settings.latitude === null ||
+          settings.latitude === ''
+          ? NaN
+          : Number(settings.latitude);
+
+          longitude =
+          settings.longitude === undefined ||
+          settings.longitude === null ||
+          settings.longitude === ''
+          ? NaN
+          : Number(settings.longitude);
+          }
+
       if (
-        settings.latitude === undefined ||
-        settings.longitude === undefined ||
-        settings.latitude === '' ||
-        settings.longitude === '' ||
         !Number.isFinite(latitude) ||
         latitude < -90 ||
         latitude > 90 ||
@@ -40,11 +87,18 @@ export const WIDGETS = {
         longitude < -180 ||
         longitude > 180
       ) {
-        components.push(
-          text(
-            'Bitte öffne die Widget-Einstellungen und trage Breitengrad und Längengrad ein.',
-          ),
-        );
+        
+        const locationMessage = {
+              de: 'Bitte wähle ein Gladys-Haus mit hinterlegten Koordinaten oder trage Breitengrad und Längengrad manuell ein.',
+              en: 'Please select a Gladys house with coordinates or enter latitude and longitude manually.',
+              fr: 'Veuillez sélectionner une maison Gladys avec des coordonnées ou saisir manuellement la latitude et la longitude.',
+              };
+
+      const lang = String(language).slice(0, 2).toLowerCase();
+
+      components.push(
+            text(locationMessage[lang] || locationMessage.de),
+      );
 
         return { ttl_seconds: ttlSeconds, components };
       }
