@@ -136,10 +136,14 @@ export const WIDGETS = {
 
         return { ttl_seconds: ttlSeconds, components };
       } catch {
+          const errorMessage = {
+            de: 'Transitous ist momentan nicht erreichbar. Bitte prüfe deine Internetverbindung. Das Widget versucht es bei der nächsten Aktualisierung erneut.',
+            en: 'Transitous is currently unreachable. Please check your internet connection. The widget will try again at the next refresh.',
+            fr: 'Transitous est actuellement inaccessible. Vérifiez votre connexion Internet. Le widget réessaiera lors de la prochaine actualisation.',
+        };
+
         components.push(
-          text(
-            'Die Abfahrten konnten gerade nicht geladen werden. Bitte später erneut versuchen.',
-          ),
+          text(errorMessage[language] || errorMessage.en),
         );
 
         return { ttl_seconds: ttlSeconds, components };
