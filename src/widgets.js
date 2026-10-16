@@ -106,8 +106,6 @@ export const WIDGETS = {
 
             const cancelled = departure.status === 'CANCELLED';
 
-            const stopName = departure.stopName || 'Unbekannte Haltestelle';
-
             return {
                 type: 'value',
                 value: shortText(
