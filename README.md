@@ -1,8 +1,11 @@
 # Gladys external integration — Transitous
 
-Hier finden sie eine externe Integration für Gladys Assistant. Sie zeigt die nähesten und nächsten Abfahrtsmöglichkeiten in einem frei wählbaren Umkreis um ihre Geolocation an.
+Hier finden sie eine externe Integration für Gladys Assistant. 
+Sie zeigt die nähesten und nächsten Abfahrtsmöglichkeiten in einem frei wählbaren Umkreis um ihre Geolocation an.
 
 Diese Entwicklung benötigt eine Installation von Gladys Assistant als Grundlage.
+
+![Ergebnis der Integration](test/transitous.png)
 
 
 Ein Beispiel mit Lissabon:
