@@ -5,7 +5,7 @@ Sie zeigt die nähesten und nächsten Abfahrtsmöglichkeiten in einem frei wähl
 
 Diese Entwicklung benötigt eine Installation von Gladys Assistant als Grundlage.
 
-![Ergebnis der Integration](test/transitous.pndg)
+![Ergebnis der Integration](test/cover.png)
 
 Ein Beispiel mit Lissabon:
 
