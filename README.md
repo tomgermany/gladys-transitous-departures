@@ -4,7 +4,7 @@ Hier finden sie eine externe Integration für Gladys Assistant. Sie zeigt die n�
 
 Diese Entwicklung benötigt eine Installation von Gladys Assistant als Grundlage.
 
-<img width="800" height="534" alt="gladys-transitous-cover-800x534 (1)" src="https://github.com/user-attachments/assets/231d652d-dbf7-4d44-bd27-bd2435b5ce6c" />
+<img width="800" height="534" alt="gladys-transitous-cover-800x534 (1)" src="[https://github.com/user-attachments/assets/231d652d-dbf7-4d44-bd27-bd2435b5ce6c](https://github.com/tomgermany/gladys-transitous-departures/blob/main/test/lissabon.png)" />
 
 Ein Beispiel mit Lissabon:
 
