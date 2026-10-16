@@ -7,6 +7,6 @@ Diese Entwicklung benötigt eine Installation von Gladys Assistant als Grundlage
 
 Ein Beispiel mit Lissabon:
 
-test/lissabon.png
+
 
 Sie erhalten u.a. Fähren im Linienverkehr, Seilbahnen im Linienverkehr, Busse, Überlandbusse, Straßenbahnen, Schnellzüge etc. etc.
