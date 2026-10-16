@@ -130,7 +130,19 @@ export const WIDGETS = {
           contact: settings.contact || undefined,
         });
 
-        components.push(text(stopSummary(result.stopsSelected), 'caption'));
+        // card list für die Badge, Entfernung, Haltestellenname
+        components.push({
+          type: 'card-list',
+          display: 'list',
+          items: result.stopsSelected.slice(0, 8).map((stop) => ({
+              title: stop.name,
+              subtitle: `${stop.distanceMeters} m`,
+              badge: {
+                text: stop.category,
+                color: stop.category === 'BUS' ? 'success' : 'info',
+                },
+            })),
+          });
 
         if (!result.departures.length) {
           components.push(
