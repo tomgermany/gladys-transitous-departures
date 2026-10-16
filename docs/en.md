@@ -14,7 +14,7 @@ All of this within a configurable radius around your home.
 
 Example:
 
-![Lissabon – Beispielansicht der Transitous-Integration](../test/lisabon.png)
+![Lissabon – Beispielansicht der Transitous-Integration](../test/lissabon.png)
 
 ## Configuration
 
