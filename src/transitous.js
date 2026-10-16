@@ -157,7 +157,7 @@ export async function getDepartures({
   lat,
   lon,
   radius = 2000,
-  count = 5,
+  count = 6,
   contact = DEFAULT_CONTACT,
 }) {
   if (
