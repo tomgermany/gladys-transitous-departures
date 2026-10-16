@@ -11,4 +11,6 @@ Ein Beispiel mit Lissabon:
 
 ![Ergebnis der Integration](test/lissabon.png)
 
-Sie erhalten u.a. die nächsten Abfahrten von  Fähren im Linienverkehr, Seilbahnen im Linienverkehr, Busse, Überlandbusse, Straßenbahnen, Schnellzüge in einem von ihnen festlegbaren Suchkreis um eine Geolocation.
+Sie erhalten u.a. die nächsten Abfahrten von  Fähren im Linienverkehr, Seilbahnen im Linienverkehr, Busse, Überlandbusse, Straßenbahnen, Schnellzüge und weitere in einem von ihnen festlegbaren Suchkreis um eine Geolocation.
+
+Übrigens, zur Zeit drei Sprachen Englisch, Deutsch und Französisch
