@@ -17,6 +17,7 @@ const messages = {
     invalidLocation: 'Bitte wähle ein Gladys-Haus mit hinterlegten Koordinaten oder trage Breitengrad und Längengrad manuell ein.',
     noStops: 'Im gewählten Umkreis wurden keine Haltestellen gefunden.',
     noDepartures: 'Im gewählten Umkreis wurden keine Abfahrten gefunden.',
+    unknownDestination: 'Ziel unbekannt',
     transitousError: 'Transitous ist momentan nicht erreichbar. Bitte prüfe deine Internetverbindung. Das Widget versucht es bei der nächsten Aktualisierung erneut.',
   },
   en: {
@@ -24,6 +25,7 @@ const messages = {
     houseLoadError: 'The coordinates of the selected Gladys house could not be loaded.',
     invalidLocation: 'Please select a Gladys house with coordinates or enter latitude and longitude manually.',
     noStops: 'No stops were found within the selected radius.',
+    unknownDestination: 'Unknown destination',
     noDepartures: 'No departures were found within the selected radius.',
     transitousError: 'Transitous is currently unreachable. Please check your internet connection. The widget will try again at the next refresh.',
   },
@@ -32,6 +34,7 @@ const messages = {
     houseLoadError: 'Impossible de charger les coordonnées de la maison Gladys sélectionnée.',
     invalidLocation: 'Veuillez sélectionner une maison Gladys avec des coordonnées ou saisir manuellement la latitude et la longitude.',
     noStops: 'Aucun arrêt trouvé dans le rayon sélectionné.',
+    unknownDestination: 'Destination inconnue',
     noDepartures: 'Aucun départ trouvé dans le rayon sélectionné.',
     transitousError: 'Transitous est actuellement inaccessible. Vérifiez votre connexion Internet. Le widget réessaiera lors de la prochaine actualisation.',
   },
@@ -190,7 +193,7 @@ export const WIDGETS = {
   `                ${departure.time ?? '--:--'}-${line.replace(/\s+/g, '')}`,
                   12,
                 ),
-                label: shortText(departure.destination || 'Ziel unbekannt', 24),
+                label: shortText(departure.destination || t.unknownDestination, 24),
                 icon: ({
                   BUS: 'bus',
                   ODM: 'bus',
