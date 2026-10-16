@@ -13,6 +13,7 @@
   "cover_image": "https://raw.githubusercontent.com/tomgermany/gladys-transitous-departures/main/cover.png",
   "categories": ["services"],
   "transports": ["cloud"],
+  "location": true,
   "config_schema": [
     {
       "key": "widget_setup_info",
