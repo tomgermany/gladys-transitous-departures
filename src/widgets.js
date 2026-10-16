@@ -174,7 +174,7 @@ export const WIDGETS = {
   `                ${departure.time ?? '--:--'}-${line.replace(/\s+/g, '')}`,
                   12,
                 ),
-                label: departureLabel(stopName, departure.destination),
+                label: shortText(departure.destination || 'Ziel unbekannt', 24),
                 icon: ({
                   BUS: 'bus',
                   ODM: 'bus',
