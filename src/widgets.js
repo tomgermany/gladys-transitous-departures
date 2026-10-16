@@ -16,66 +16,6 @@ function shortText(value, maxLength) {
 }
 
 
-
-function departureLabel(stopName, destination) {
-  // 1. Maximale Anzeigelänge und Trennzeichen festlegen.
-  const separator = '»';
-  const maxLength = 24;
-  const nameBudget = maxLength - separator.length;
-
-  // 2. Leerzeichen aus beiden Namen entfernen.
-  //    So nutzen wir den verfügbaren Platz besser aus.
-  const stop = String(stopName || 'Unbekannte Haltestelle')
-    .trim()
-    .replace(/\s+/g, '');
-  const target = String(destination || 'Ziel unbekannt')
-    .trim()
-    .replace(/\s+/g, '');
-
-
-  // 3. Zunächst reservieren wir 11 Zeichen für jeden Namen.
-  let stopLength = Math.min(stop.length, 11);
-  let targetLength = Math.min(target.length, 11);
-
-  // 4. Ist die Abfahrt kürzer als 11 Zeichen, kann das Ziel
-  //    den freien Platz nutzen. Ist das Ziel kürzer, erhält
-  //    umgekehrt die Abfahrt den freien Platz.
-  if (stop.length < 11) {
-    stopLength = stop.length;
-    targetLength = Math.min(target.length, nameBudget - stopLength);
-  } else if (target.length < 11) {
-    targetLength = target.length;
-    stopLength = Math.min(stop.length, nameBudget - targetLength);
-  }
-
-  // 5. Die Abfahrt behält ihr Ende; das Ziel behält seinen Anfang.
-  //    Beide Längen zusammen dürfen das Zeichenbudget nicht überschreiten.
-  if (stopLength + targetLength > nameBudget) {
-    targetLength = Math.max(0, nameBudget - stopLength);
-  }
-
-
-  // 6. Passt die Abfahrt immer noch nicht, kürzen wir sie
-  //    von vorne. Das Ende der Haltestelle bleibt erhalten.
-  if (stopLength + targetLength > nameBudget) {
-    stopLength = Math.max(0, nameBudget - targetLength);
-  }
-
-  // 7. Die Abfahrt vom Anfang her und das Ziel vom Ende her
-  //    auf die berechneten Längen begrenzen.
-  const shortStop = stop.slice(Math.max(0, stop.length - stopLength));
-  const shortTarget = target.slice(0, targetLength);
-
-  // 8. Überflüssige Satzzeichen an den Rändern entfernen.
-  //    Buchstaben lassen wir unangetastet, damit ungewöhnliche
-  //    Haltestellennamen nicht versehentlich verändert werden.
-  const cleanStop = shortStop.replace(/^[,.-]+|[,.-]+$/g, '');
-  const cleanTarget = shortTarget.replace(/^[,.-]+|[,.-]+$/g, '');
-
-  // 9. Namen verbinden und die maximale Länge absichern.
-  return `${cleanStop}${separator}${cleanTarget}`.slice(0, maxLength);
-}
-
 export const WIDGETS = {
   [TRANSITOUS_DEPARTURES_WIDGET]: {
     async get(gladys, { settings = {} }) {
