@@ -68,7 +68,7 @@ function modeCategory(mode) {
   }
 
   if (mode === 'FERRY') return 'FERRY';
-  if (mode === 'FUNICULAR') return 'FUNICULAR';
+  if (mode === 'FUNICULAR') return 'CableCar';
 
   return null;
 }
