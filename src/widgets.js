@@ -18,7 +18,7 @@ function shortText(value, maxLength) {
 
 export const WIDGETS = {
   [TRANSITOUS_DEPARTURES_WIDGET]: {
-    async get(gladys, { settings = {} }) {
+    async get(gladys, { settings = {}, language = 'de' }) {
       const latitude = Number(settings.latitude);
       const longitude = Number(settings.longitude);
       const radius = Number(settings.radius ?? 2000);
@@ -136,14 +136,16 @@ export const WIDGETS = {
 
         return { ttl_seconds: ttlSeconds, components };
       } catch {
-          const errorMessage = {
-            de: 'Transitous ist momentan nicht erreichbar. Bitte prüfe deine Internetverbindung. Das Widget versucht es bei der nächsten Aktualisierung erneut.',
-            en: 'Transitous is currently unreachable. Please check your internet connection. The widget will try again at the next refresh.',
-            fr: 'Transitous est actuellement inaccessible. Vérifiez votre connexion Internet. Le widget réessaiera lors de la prochaine actualisation.',
+        const errorMessage = {
+          de: 'Transitous ist momentan nicht erreichbar. Bitte prüfe deine Internetverbindung. Das Widget versucht es bei der nächsten Aktualisierung erneut.',
+          en: 'Transitous is currently unreachable. Please check your internet connection. The widget will try again at the next refresh.',
+          fr: 'Transitous est actuellement inaccessible. Vérifiez votre connexion Internet. Le widget réessaiera lors de la prochaine actualisation.',
         };
 
+        const lang = String(language).slice(0, 2).toLowerCase();
+
         components.push(
-          text(errorMessage[language] || errorMessage.en),
+          text(errorMessage[lang] || errorMessage.de),
         );
 
         return { ttl_seconds: ttlSeconds, components };
