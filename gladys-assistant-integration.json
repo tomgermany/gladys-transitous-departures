@@ -92,50 +92,34 @@
           "max": 50000
         },
         {
-          "key": "count",
-          "type": "select",
-          "label": {
-            "en": "Number of departures",
-            "de": "Anzahl der Abfahrten",
-            "fr": "Nombre de départs"
-          },
-          "required": true,
-          "default": "5",
-          "options": [
-            {
-              "value": "5",
-              "label": {
-                "en": "5",
-                "de": "5",
-                "fr": "5"
-              }
-            },
-            {
-              "value": "6",
-              "label": {
-                "en": "6",
-                "de": "6",
-                "fr": "6"
-              }
-            },
-            {
-              "value": "7",
-              "label": {
-                "en": "7",
-                "de": "7",
-                "fr": "7"
-              }
-            },
-            {
-              "value": "8",
-              "label": {
-                "en": "8",
-                "de": "8",
-                "fr": "8"
-              }
-            }
-          ]
-        },
+  "key": "count",
+  "type": "select",
+  "label": {
+    "en": "Number of departures",
+    "de": "Anzahl der Abfahrten",
+    "fr": "Nombre de départs"
+  },
+  "required": true,
+  "default": "6",
+  "options": [
+    {
+      "value": "3",
+      "label": {
+        "en": "3",
+        "de": "3",
+        "fr": "3"
+      }
+    },
+    {
+      "value": "6",
+      "label": {
+        "en": "6",
+        "de": "6",
+        "fr": "6"
+      }
+    }
+  ]
+},
         {
           "key": "refresh_minutes",
           "type": "select",
