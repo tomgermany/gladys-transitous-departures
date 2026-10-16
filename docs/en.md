@@ -16,6 +16,11 @@ Example:
 
 ![Lissabon – Beispielansicht der Transitous-Integration](../test/lissabon.png)
 
+Result: For each of the six tiles, the nearest stop is first determined once. That is, the nearest bus stop, nearest ferry, and nearest rail stop.
+The next departure from that stop is then displayed.
+This means: If there is only one stop within your search radius, you will see the next six departures.
+If multiple stops are found, they are displayed using color coding.
+
 ## Configuration
 
 1. Install the external integration either through Gladys Assistant (recommended)
