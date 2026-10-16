@@ -85,7 +85,7 @@ export const WIDGETS = {
         }
 
         components.push(
-          ...result.departures.slice(0, 6).map((departure) => {
+          ...result.departures.slice(0, count).map((departure) => {
             const line = departure.line || departure.displayedMode;
 
             const lineColor = {
