@@ -8,13 +8,13 @@ Internet Access for Your Gladys Assistant Installation
 
 ## You get:
 
-You'll receive an external integration for Galdys Assistant. This integration automatically displays the next 6 public transportation departures in a clear, easy-to-read widget—from buses to trains, ferries, and cable cars.
+You'll receive an external integration for Galdys Assistant. 
+This integration automatically displays the next 6 public transportation departures in a clear, easy-to-read widget—from buses to trains, ferries, and cable cars.
 All of this within a configurable radius around your home.
 
 ## Configuration
 
-1.
-Install the external integration either through Gladys Assistant (recommended)
+1. Install the external integration either through Gladys Assistant (recommended)
  or in Gladys Assistant with direct access to GitHub.
 3. After Installation check that Integration is running.
 4. Open your Dashboard and go into Edit Modus and there add the new Widget.
