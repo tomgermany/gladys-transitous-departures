@@ -45,6 +45,16 @@
       "icon": "map-pin",
       "settings": [
         {
+          "key": "house",
+          "type": "select",
+          "source": "houses",
+          "label": {
+            "en": "Select a Gladys house (optional)",
+            "de": "Gladys-Haus auswählen (optional)",
+            "fr": "Choisir une maison Gladys (facultatif)"
+          }
+        },
+        {
           "key": "latitude",
           "type": "number",
           "label": {
