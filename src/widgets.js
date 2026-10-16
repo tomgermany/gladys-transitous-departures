@@ -21,7 +21,7 @@ export const WIDGETS = {
       const latitude = Number(settings.latitude);
       const longitude = Number(settings.longitude);
       const radius = Number(settings.radius ?? 2000);
-      const count = Number(settings.count ?? 5);
+      const count = Number(settings.count ?? 6);
       const refreshMinutes = Number(settings.refresh_minutes ?? 30);
 
       const ttlSeconds = Math.min(3600, Math.max(600, refreshMinutes * 60));
