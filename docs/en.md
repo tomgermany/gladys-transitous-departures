@@ -14,7 +14,7 @@ All of this within a configurable radius around your home.
 
 Example:
 
-![Heidelberg – Beispielansicht der Transitous-Integration](../test/heidelberg.png)
+![Lissabon – Beispielansicht der Transitous-Integration](../test/lisabon.png)
 
 ## Configuration
 
