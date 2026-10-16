@@ -7,8 +7,6 @@ Diese Entwicklung benötigt eine Installation von Gladys Assistant als Grundlage
 
 Ein Beispiel mit Lissabon:
 
-![Ergebnis der Integration](tests/lissabon.png)
-
-https://github.com/tomgermany/gladys-transitous-departures/blob/main/test/lissabon.png
+![Ergebnis der Integration](test/lissabon.png)
 
 Sie erhalten u.a. Fähren im Linienverkehr, Seilbahnen im Linienverkehr, Busse, Überlandbusse, Straßenbahnen, Schnellzüge etc. etc.
