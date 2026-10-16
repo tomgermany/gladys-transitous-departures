@@ -9,31 +9,115 @@ const text = (value, variant = 'body') => ({
   text: value,
 });
 
+
+const messages = {
+  de: {
+    heading: 'ÖPNV-Abfahrten in der Nähe',
+    houseLoadError: 'Die Koordinaten des ausgewählten Gladys-Hauses konnten nicht geladen werden.',
+    invalidLocation: 'Bitte wähle ein Gladys-Haus mit hinterlegten Koordinaten oder trage Breitengrad und Längengrad manuell ein.',
+    noStops: 'Im gewählten Umkreis wurden keine Haltestellen gefunden.',
+    noDepartures: 'Im gewählten Umkreis wurden keine Abfahrten gefunden.',
+    unknownDestination: 'Ziel unbekannt',
+    transitousError: 'Transitous ist momentan nicht erreichbar. Bitte prüfe deine Internetverbindung. Das Widget versucht es bei der nächsten Aktualisierung erneut.',
+  },
+  en: {
+    heading: 'Public transport departures nearby',
+    houseLoadError: 'The coordinates of the selected Gladys house could not be loaded.',
+    invalidLocation: 'Please select a Gladys house with coordinates or enter latitude and longitude manually.',
+    noStops: 'No stops were found within the selected radius.',
+    unknownDestination: 'Unknown destination',
+    noDepartures: 'No departures were found within the selected radius.',
+    transitousError: 'Transitous is currently unreachable. Please check your internet connection. The widget will try again at the next refresh.',
+  },
+  fr: {
+    heading: 'Départs des transports en commun à proximité',
+    houseLoadError: 'Impossible de charger les coordonnées de la maison Gladys sélectionnée.',
+    invalidLocation: 'Veuillez sélectionner une maison Gladys avec des coordonnées ou saisir manuellement la latitude et la longitude.',
+    noStops: 'Aucun arrêt trouvé dans le rayon sélectionné.',
+    unknownDestination: 'Destination inconnue',
+    noDepartures: 'Aucun départ trouvé dans le rayon sélectionné.',
+    transitousError: 'Transitous est actuellement inaccessible. Vérifiez votre connexion Internet. Le widget réessaiera lors de la prochaine actualisation.',
+  },
+};
+
+const getMessages = (language) => {
+  const lang = String(language).slice(0, 2).toLowerCase();
+  return messages[lang] || messages.de;
+};
+
+
 function shortText(value, maxLength) {
   const result = String(value ?? '').trim();
   if (result.length <= maxLength) return result;
   return `${result.slice(0, maxLength - 1)}…`;
 }
 
-
 export const WIDGETS = {
   [TRANSITOUS_DEPARTURES_WIDGET]: {
-    async get(gladys, { settings = {} }) {
-      const latitude = Number(settings.latitude);
-      const longitude = Number(settings.longitude);
+    async get(gladys, { settings = {}, language = 'de' }) {
+      let latitude;
+      let longitude;
+
       const radius = Number(settings.radius ?? 2000);
-      const count = Number(settings.count ?? 5);
+      const count = Number(settings.count ?? 6);
       const refreshMinutes = Number(settings.refresh_minutes ?? 30);
 
       const ttlSeconds = Math.min(3600, Math.max(600, refreshMinutes * 60));
 
-      const components = [text('ÖPNV-Abfahrten in der Nähe', 'heading')];
+      const t = getMessages(language);
+      const components = [text(t.heading, 'heading')];
+
+      if (settings.house) {
+        try {
+          const response = await fetch(
+            `${process.env.GLADYS_HOST_API_URL}/api/integration/v1/house`,
+            {
+              headers: {
+                Authorization: `Bearer ${process.env.GLADYS_INTEGRATION_TOKEN}`,
+              },
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error('Häuser konnten nicht geladen werden.');
+          }
+
+          const houses = await response.json();
+          const house = houses.find((item) => item.selector === settings.house);
+
+          if (
+              house &&
+              house.latitude !== null &&
+              house.latitude !== undefined &&
+              house.longitude !== null &&
+              house.longitude !== undefined
+              ) {
+              latitude = Number(house.latitude);
+              longitude = Number(house.longitude);
+          }
+        } catch {
+          components.push(
+            text(t.houseLoadError)
+          );
+          return { ttl_seconds: ttlSeconds, components };
+        }
+      } else {
+          latitude =
+          settings.latitude === undefined ||
+          settings.latitude === null ||
+          settings.latitude === ''
+          ? NaN
+          : Number(settings.latitude);
+
+          longitude =
+          settings.longitude === undefined ||
+          settings.longitude === null ||
+          settings.longitude === ''
+          ? NaN
+          : Number(settings.longitude);
+          }
 
       if (
-        settings.latitude === undefined ||
-        settings.longitude === undefined ||
-        settings.latitude === '' ||
-        settings.longitude === '' ||
         !Number.isFinite(latitude) ||
         latitude < -90 ||
         latitude > 90 ||
@@ -41,11 +125,8 @@ export const WIDGETS = {
         longitude < -180 ||
         longitude > 180
       ) {
-        components.push(
-          text(
-            'Bitte öffne die Widget-Einstellungen und trage Breitengrad und Längengrad ein.',
-          ),
-        );
+        
+        components.push(text(t.invalidLocation));
 
         return { ttl_seconds: ttlSeconds, components };
       }
@@ -74,19 +155,19 @@ export const WIDGETS = {
           });
 } else {
   components.push(
-    text('Im gewählten Umkreis wurden keine Haltestellen gefunden.'),
+    text(t.noStops)
   );
 }
 
         if (!result.departures.length) {
           components.push(
-            text('Im gewählten Umkreis wurden keine Abfahrten gefunden.'),
+            text(t.noDepartures)
           );
           return { ttl_seconds: ttlSeconds, components };
         }
 
         components.push(
-          ...result.departures.slice(0, 6).map((departure) => {
+          ...result.departures.slice(0, count).map((departure) => {
             const line = departure.line || departure.displayedMode;
 
             const lineColor = {
@@ -112,7 +193,7 @@ export const WIDGETS = {
   `                ${departure.time ?? '--:--'}-${line.replace(/\s+/g, '')}`,
                   12,
                 ),
-                label: shortText(departure.destination || 'Ziel unbekannt', 24),
+                label: shortText(departure.destination || t.unknownDestination, 24),
                 icon: ({
                   BUS: 'bus',
                   ODM: 'bus',
@@ -136,11 +217,7 @@ export const WIDGETS = {
 
         return { ttl_seconds: ttlSeconds, components };
       } catch {
-        components.push(
-          text(
-            'Die Abfahrten konnten gerade nicht geladen werden. Bitte später erneut versuchen.',
-          ),
-        );
+        components.push(text(t.transitousError));
 
         return { ttl_seconds: ttlSeconds, components };
       }

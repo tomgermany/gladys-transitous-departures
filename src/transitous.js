@@ -157,7 +157,7 @@ export async function getDepartures({
   lat,
   lon,
   radius = 2000,
-  count = 5,
+  count = 6,
   contact = DEFAULT_CONTACT,
 }) {
   if (
@@ -180,9 +180,9 @@ export async function getDepartures({
     throw new Error('Der Suchradius muss zwischen 1 und 50000 Metern liegen.');
   }
 
-  if (!Number.isInteger(count) || count < 5 || count > 8) {
-    count = 5;
-  }
+  if (![3, 6].includes(count)) {
+  count = 6;
+}
 
   // 1. Haltestellen im gewählten Umkreis suchen.
 

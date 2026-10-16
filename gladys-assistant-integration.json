@@ -13,6 +13,7 @@
   "cover_image": "https://raw.githubusercontent.com/tomgermany/gladys-transitous-departures/main/cover.png",
   "categories": ["services"],
   "transports": ["cloud"],
+  "location": true,
   "config_schema": [
     {
       "key": "widget_setup_info",
@@ -45,6 +46,16 @@
       "icon": "map-pin",
       "settings": [
         {
+          "key": "house",
+          "type": "select",
+          "source": "houses",
+          "label": {
+            "en": "Select a Gladys house (optional)",
+            "de": "Gladys-Haus auswählen (optional)",
+            "fr": "Choisir une maison Gladys (facultatif)"
+          }
+        },
+        {
           "key": "latitude",
           "type": "number",
           "label": {
@@ -57,7 +68,7 @@
             "de": "z. B. 49.350",
             "fr": "ex. 49.350"
           },
-          "required": true,
+          "required": false,
           "min": -90,
           "max": 90
         },
@@ -74,7 +85,7 @@
             "de": "z. B. 8.690",
             "fr": "ex. 8.690"
           },
-          "required": true,
+          "required": false,
           "min": -180,
           "max": 180
         },
