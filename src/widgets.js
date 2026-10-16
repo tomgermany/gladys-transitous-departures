@@ -9,6 +9,24 @@ const text = (value, variant = 'body') => ({
   text: value,
 });
 
+const messages = {
+  de: {
+    heading: 'ÖPNV-Abfahrten in der Nähe',
+  },
+  en: {
+    heading: 'Public transport departures nearby',
+  },
+  fr: {
+    heading: 'Départs des transports en commun à proximité',
+  },
+};
+
+const getMessages = (language) => {
+  const lang = String(language).slice(0, 2).toLowerCase();
+  return messages[lang] || messages.de;
+};
+
+
 function shortText(value, maxLength) {
   const result = String(value ?? '').trim();
   if (result.length <= maxLength) return result;
@@ -27,7 +45,8 @@ export const WIDGETS = {
 
       const ttlSeconds = Math.min(3600, Math.max(600, refreshMinutes * 60));
 
-      const components = [text('ÖPNV-Abfahrten in der Nähe', 'heading')];
+      const t = getMessages(language);
+      const components = [text(t.heading, 'heading')];
 
       if (settings.house) {
         try {
