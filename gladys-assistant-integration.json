@@ -118,21 +118,65 @@
           "min": -180,
           "max": 180
         },
-        {
+                {
           "key": "radius",
-          "type": "number",
+          "type": "select",
           "label": {
-            "en": "Search radius (metres)",
-            "es": "Radio de búsqueda (metros)",
-            "de": "Suchradius (Meter)",
-            "fr": "Rayon de recherche (mètres)",
-            "ko": "검색 반경 (미터)",
-            "kl": "Ujaasiffik (meteri)"
+            "en": "Search radius",
+            "es": "Radio de búsqueda",
+            "de": "Suchradius",
+            "fr": "Rayon de recherche",
+            "ko": "검색 반경",
+            "kl": "Ujaasiffik"
           },
           "required": true,
-          "default": 2000,
-          "min": 100,
-          "max": 50000
+          "default": "2000",
+          "options": [
+            {
+              "value": "500",
+              "label": {
+                "en": "500 metres",
+                "de": "500 Meter",
+                "es": "500 metros",
+                "fr": "500 mètres",
+                "ko": "500미터",
+                "kl": "500 meter"
+              }
+            },
+            {
+              "value": "2000",
+              "label": {
+                "en": "2,000 metres",
+                "de": "2.000 Meter",
+                "es": "2.000 metros",
+                "fr": "2 000 mètres",
+                "ko": "2,000미터",
+                "kl": "2.000 meter"
+              }
+            },
+            {
+              "value": "5000",
+              "label": {
+                "en": "5,000 metres",
+                "de": "5.000 Meter",
+                "es": "5.000 metros",
+                "fr": "5 000 mètres",
+                "ko": "5,000미터",
+                "kl": "5.000 meter"
+              }
+            },
+            {
+              "value": "10000",
+              "label": {
+                "en": "10,000 metres (maximum)",
+                "de": "10.000 Meter (Maximum)",
+                "es": "10.000 metros (máximo)",
+                "fr": "10 000 mètres (maximum)",
+                "ko": "10,000미터(최대)",
+                "kl": "10.000 meter (annerpaamik)"
+              }
+            }
+          ]
         },
         {
           "key": "count",
