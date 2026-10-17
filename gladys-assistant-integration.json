@@ -13,7 +13,7 @@
   "version": "2.0.0",
   "docker_image": "ghcr.io/tomgermany/gladys-transitous-departures:2.0.0",
   "gladys_version": ">=5.2.0",
-  "cover_image": "https://githubusercontent.com",
+  "cover_image": "https://raw.githubusercontent.com/tomgermany/gladys-transitous-departures/main/cover.png",
   "categories": ["services"],
   "transports": ["cloud"],
   "location": true,
