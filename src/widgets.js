@@ -342,6 +342,7 @@ export const WIDGETS = {
                 BUS: 'bus',
                 ODM: 'bus',
                 FERRY: 'ship',
+                AIRPLANE: 'plane',
                 FUNICULAR: 'maximize-2',
                 TRAM: 'train-front',
                 SUBWAY: 'train-front',
