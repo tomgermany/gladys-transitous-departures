@@ -23,6 +23,7 @@ on:
     branches:
       - main
       - internet-zugang
+      - error-handling
   pull_request:
 
 # Checks only read the code: no write scope for the token, whatever the
