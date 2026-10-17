@@ -9,7 +9,6 @@ const text = (value, variant = 'body') => ({
   text: value,
 });
 
-
 const messages = {
   de: {
     heading: 'ÖPNV-Abfahrten in der Nähe',
@@ -46,6 +45,24 @@ const messages = {
     unknownDestination: 'Destination inconnue',
     noDepartures: 'Aucun départ trouvé dans le rayon sélectionné.',
     transitousError: 'Transitous est actuellement inaccessible. Vérifiez votre connexion Internet. Le widget réessaiera lors de la prochaine actualisation.',
+  },
+  ko: {
+    heading: '주변 대중교통 출발 정보',
+    houseLoadError: '선택한 Gladys 집의 좌표를 불러올 수 없습니다.',
+    invalidLocation: '좌표가 저장된 Gladys 집을 선택하거나 위도와 경도를 수동으로 입력해 주세요.',
+    noStops: '선택한 반경 내에 정류장이 없습니다.',
+    noDepartures: '선택한 반경 내에 출발 정보가 없습니다.',
+    unknownDestination: '알 수 없는 목적지',
+    transitousError: '현재 Transitous에 연결할 수 없습니다. 인터넷 연결을 확인해 주세요. 다음 새로고침 때 다시 시도합니다.',
+  },
+  kl: {
+    heading: 'Qanitsumi angallatit aallartarfii',
+    houseLoadError: 'Gladys-ip illuata toqqakkap nalaat aaneqarsinnaanngillat.',
+    invalidLocation: 'Gladys-illu nalaanik nalunaarsimasumik toqqagit imalt. sanimut ammut tikeq (latitude/longitude) nammineq allaguk.',
+    noStops: 'Ujaasiffiup avatangiisiani uniffissanik nassaartoqanngilaq.',
+    noDepartures: 'Ujaasiffiup avatangiisiani aallarnissanik nassaartoqanngilaq.',
+    unknownDestination: 'Sumunnarnera ilisimaneqanngilaq',
+    transitousError: 'Transitous nal tanna attavigineqarsinnaanngilaq. Internetit pikkunnersaa takujuk. Widgeti tullianik nutarteruni misileqqissaaq.',
   },
 };
 
