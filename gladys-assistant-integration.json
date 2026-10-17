@@ -43,11 +43,11 @@
       "key": "transitous_departures",
       "label": {
         "en": "Nearby transit departures",
-        "es": "Salidas de transporte público cercanas",
+        "es": "Salidas cercanas",
         "de": "ÖPNV-Abfahrten in der Nähe",
         "fr": "Départs à proximité",
         "ko": "주변 대중교통 출발 정보",
-        "kl": "Qanitsumi angallatit aallartarfii"
+        "kl": "Angallatit aallartarfii"
       },
       "description": {
         "en": "Next public transport departures around a chosen location.",
@@ -118,21 +118,78 @@
           "min": -180,
           "max": 180
         },
+                
         {
-          "key": "radius",
+          "key": "radius1",
           "type": "number",
           "label": {
-            "en": "Search radius (metres)",
-            "es": "Radio de búsqueda (metros)",
-            "de": "Suchradius (Meter)",
-            "fr": "Rayon de recherche (mètres)",
-            "ko": "검색 반경 (미터)",
-            "kl": "Ujaasiffik (meteri)"
+            "en": "Search radius 1 (metres)",
+            "es": "Radio de búsqueda 1 (metros)",
+            "de": "Suchkreis 1 (Meter)",
+            "fr": "Rayon de recherche 1 (mètres)",
+            "ko": "검색 반경 1 (미터)",
+            "kl": "Ujaasiffik 1 (meter)"
+          },
+          "description": {
+            "en": "Initial search radius. Default: 500 metres. Maximum effective radius: 10 km.",
+            "es": "Radio inicial. Predeterminado: 500 metros. Radio máximo efectivo: 10 km.",
+            "de": "Erster Suchradius. Standard: 500 Meter. Achtung: Max. 10 km. Darüber wird begrenzt.",
+            "fr": "Rayon initial. Par défaut : 500 mètres. Rayon effectif maximal : 10 km.",
+            "ko": "초기 검색 반경. 기본값: 500미터. 최대 반경: 10km.",
+            "kl": "Ujaasiffik aallartittoq. Nalinginnaasoq: 500 meter. Annertunerpaamik: 10 km."
           },
           "required": true,
-          "default": 2000,
-          "min": 100,
-          "max": 50000
+          "default": 500,
+          "min": 1,
+          "max": 10000
+        },
+        {
+          "key": "radius2_add",
+          "type": "number",
+          "label": {
+            "en": "Search radius 2 (additional metres)",
+            "es": "Radio de búsqueda 2 (metros adicionales)",
+            "de": "Suchkreis 2 (zusätzliche Meter)",
+            "fr": "Rayon de recherche 2 (mètres supplémentaires)",
+            "ko": "검색 반경 2 (추가 미터)",
+            "kl": "Ujaasiffik 2 (meter ilassut)"
+          },
+          "description": {
+            "en": "Added to search radius 1. Default: 1,500 metres.",
+            "es": "Se suma al radio 1. Predeterminado: 1.500 metros.",
+            "de": "Wird zu Suchkreis 1 addiert. Standard: 1.500 Meter.",
+            "fr": "S'ajoute au rayon 1. Par défaut : 1 500 mètres.",
+            "ko": "검색 반경 1에 추가됩니다. 기본값: 1,500미터.",
+            "kl": "Ujaasiffik 1-imut ilassutaavoq. Nalinginnaasoq: 1.500 meter."
+          },
+          "required": true,
+          "default": 1500,
+          "min": 0,
+          "max": 10000
+        },
+        {
+          "key": "radius3_add",
+          "type": "number",
+          "label": {
+            "en": "Search radius 3 (additional metres)",
+            "es": "Radio de búsqueda 3 (metros adicionales)",
+            "de": "Suchkreis 3 (zusätzliche Meter)",
+            "fr": "Rayon de recherche 3 (mètres supplémentaires)",
+            "ko": "검색 반경 3 (추가 미터)",
+            "kl": "Ujaasiffik 3 (meter ilassut)"
+          },
+          "description": {
+            "en": "Added to search radii 1 and 2. Default: 3,000 metres.",
+            "es": "Se suma a los radios 1 y 2. Predeterminado: 3.000 metros.",
+            "de": "Wird zu Suchkreis 1 und 2 addiert. Standard: 3.000 Meter.",
+            "fr": "S'ajoute aux rayons 1 et 2. Par défaut : 3 000 mètres.",
+            "ko": "검색 반경 1과 2에 추가됩니다. 기본값: 3,000미터.",
+            "kl": "Ujaasiffik 1 aamma 2-mut ilassutaavoq. Nalinginnaasoq: 3.000 meter."
+          },
+          "required": true,
+          "default": 3000,
+          "min": 0,
+          "max": 10000
         },
         {
           "key": "count",
