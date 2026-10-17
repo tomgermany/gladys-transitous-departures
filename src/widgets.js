@@ -123,36 +123,23 @@ function getRadiusSteps(settings) {
   ])];
 }
 
-function formatRadius(radius) {
-  return radius < 1000 ? `${radius} m` : `${radius / 1000} km`;
-}
+/**
+ * Erstellt das kompakte Radius-Label.
+ *
+ * Der aktuelle Radius steht in eckigen Klammern.
+ * Der Pfeil zeigt, in welche Richtung der nächste Klick führt.
+ * Die Werte werden in Metern angezeigt, damit das Label möglichst kurz bleibt.
+ */
+function getRadiusButtonLabel(steps, currentIndex, direction) {
+  const radiusLabel = steps
+    .map((radius, index) => (
+      index === currentIndex ? `[${radius}]` : String(radius)
+    ))
+    .join(' - ');
 
-function getRadiusButtonLabel(language, radius, direction) {
-  const lang = String(language ?? 'de').slice(0, 2).toLowerCase();
-  const distance = formatRadius(radius);
-
-  const labels = {
-    de: direction === 'backward'
-      ? `Zurück: ${distance}`
-      : `Weiter suchen: ${distance}`,
-    en: direction === 'backward'
-      ? `Search closer: ${distance}`
-      : `Search farther: ${distance}`,
-    es: direction === 'backward'
-      ? `Reducir radio: ${distance}`
-      : `Ampliar radio: ${distance}`,
-    fr: direction === 'backward'
-      ? `Réduire le rayon : ${distance}`
-      : `Élargir le rayon : ${distance}`,
-    ko: direction === 'backward'
-      ? `반경 축소: ${distance}`
-      : `반경 확대: ${distance}`,
-    kl: direction === 'backward'
-      ? `Ujaasinerup annikillinerani: ${distance}`
-      : `Ujaasinerup annertusinerani: ${distance}`,
-  };
-
-  return labels[lang] || labels.de;
+  return direction === 'backward'
+    ? `← ${radiusLabel}`
+    : `${radiusLabel} →`;
 }
 
 function addRadiusButton(components, settings, language, currentRadius) {
@@ -188,8 +175,7 @@ function addRadiusButton(components, settings, language, currentRadius) {
 
   components.push({
     type: 'button',
-    label: getRadiusButtonLabel(language, steps[targetIndex], direction),
-    icon: 'search',
+    label: getRadiusButtonLabel(steps, currentIndex, direction),
     style: 'secondary',
     action: {
       key: 'change_radius',
