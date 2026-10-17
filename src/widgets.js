@@ -9,9 +9,26 @@ const text = (value, variant = 'body') => ({
   text: value,
 });
 
+/**
+ * Zentrale Farbzuordnung für die fünf Verkehrsmittelkategorien.
+ *
+ * Diese Zuordnung wird sowohl für die Haltestellen-Badges
+ * als auch für die Abfahrtskacheln verwendet.
+ *
+ * Ausgefallene Abfahrten erhalten unabhängig von der Kategorie
+ * immer die Farbe danger.
+ */
+const CATEGORY_COLORS = {
+  BUS: 'success',
+  REGIONAL: 'info',
+  SPECIAL: 'neutral',
+  URBAN: 'warning',
+  RAIL: 'primary',
+};
+
 const messages = {
   de: {
-    heading: 'ÖPNV-Abfahrten in der Nähe',
+    heading: 'Abfahrten in der Nähe',
     houseLoadError: 'Die Koordinaten des ausgewählten Gladys-Hauses konnten nicht geladen werden.',
     invalidLocation: 'Bitte wähle ein Gladys-Haus mit hinterlegten Koordinaten oder trage Breitengrad und Längengrad manuell ein.',
     noStops: 'Im gewählten Umkreis wurden keine Haltestellen gefunden.',
@@ -106,36 +123,23 @@ function getRadiusSteps(settings) {
   ])];
 }
 
-function formatRadius(radius) {
-  return radius < 1000 ? `${radius} m` : `${radius / 1000} km`;
-}
+/**
+ * Erstellt das kompakte Radius-Label.
+ *
+ * Der aktuelle Radius steht in eckigen Klammern.
+ * Der Pfeil zeigt, in welche Richtung der nächste Klick führt.
+ * Die Werte werden in Metern angezeigt, damit das Label möglichst kurz bleibt.
+ */
+function getRadiusButtonLabel(steps, currentIndex, direction) {
+  const radiusLabel = steps
+    .map((radius, index) => (
+      index === currentIndex ? `[${radius}]` : String(radius)
+    ))
+    .join(' - ');
 
-function getRadiusButtonLabel(language, radius, direction) {
-  const lang = String(language ?? 'de').slice(0, 2).toLowerCase();
-  const distance = formatRadius(radius);
-
-  const labels = {
-    de: direction === 'backward'
-      ? `Zurück: ${distance}`
-      : `Weiter suchen: ${distance}`,
-    en: direction === 'backward'
-      ? `Search closer: ${distance}`
-      : `Search farther: ${distance}`,
-    es: direction === 'backward'
-      ? `Reducir radio: ${distance}`
-      : `Ampliar radio: ${distance}`,
-    fr: direction === 'backward'
-      ? `Réduire le rayon : ${distance}`
-      : `Élargir le rayon : ${distance}`,
-    ko: direction === 'backward'
-      ? `반경 축소: ${distance}`
-      : `반경 확대: ${distance}`,
-    kl: direction === 'backward'
-      ? `Ujaasinerup annikillinerani: ${distance}`
-      : `Ujaasinerup annertusinerani: ${distance}`,
-  };
-
-  return labels[lang] || labels.de;
+  return direction === 'backward'
+    ? `← ${radiusLabel}`
+    : `${radiusLabel} →`;
 }
 
 function addRadiusButton(components, settings, language, currentRadius) {
@@ -171,8 +175,7 @@ function addRadiusButton(components, settings, language, currentRadius) {
 
   components.push({
     type: 'button',
-    label: getRadiusButtonLabel(language, steps[targetIndex], direction),
-    icon: 'search',
+    label: getRadiusButtonLabel(steps, currentIndex, direction),
     style: 'secondary',
     action: {
       key: 'change_radius',
@@ -289,7 +292,8 @@ export const WIDGETS = {
               title: `${stop.distanceMeters} m · ${stop.name}`,
               badge: {
                 text: stop.category,
-                color: stop.category === 'BUS' ? 'success' : 'info',
+                // Dieselbe zentrale Farbzuordnung wie bei den Abfahrten.
+                color: CATEGORY_COLORS[stop.category] || 'neutral',
               },
             })),
           });
@@ -310,22 +314,6 @@ export const WIDGETS = {
         components.push(
           ...result.departures.slice(0, count).map((departure) => {
             const line = departure.line || departure.displayedMode;
-
-            const lineColor = {
-              BUS: 'success',
-              ODM: 'success',
-              TRAM: 'warning',
-              SUBWAY: 'warning',
-              RAIL: 'info',
-              REGIONAL_RAIL: 'info',
-              REGIONAL_FAST_RAIL: 'info',
-              SUBURBAN: 'info',
-              HIGHSPEED_RAIL: 'info',
-              HIGH_SPEED_RAIL: 'info',
-              LONG_DISTANCE: 'info',
-              NIGHT_RAIL: 'info',
-            }[departure.mode] || 'primary';
-
             const cancelled = departure.status === 'CANCELLED';
 
             return {
@@ -355,7 +343,12 @@ export const WIDGETS = {
                 LONG_DISTANCE: 'train-front',
                 NIGHT_RAIL: 'train-front',
               })[departure.mode] || 'bus',
-              color: cancelled ? 'danger' : lineColor,
+
+              // Ausfälle sind immer rot. Alle anderen Abfahrten verwenden
+              // dieselbe Kategorie-Farbzuordnung wie die Haltestellen-Badges.
+              color: cancelled
+                ? 'danger'
+                : CATEGORY_COLORS[departure.category] || 'primary',
             };
           }),
         );
@@ -388,6 +381,7 @@ export const WIDGETS = {
         return { ttl_seconds: ttlSeconds, components };
       }
     },
+
     async action(gladys, { actionKey, params = {}, settings = {} }) {
       if (actionKey !== 'change_radius') return;
 

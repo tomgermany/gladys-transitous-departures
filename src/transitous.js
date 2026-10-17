@@ -1,8 +1,13 @@
+
 const API_URL = 'https://api.transitous.org/api/v6/stoptimes';
 const APP_NAME = 'Gladys Transitous Departures';
 const APP_VERSION = '1.5.0';
 const DEFAULT_CONTACT = 'https://github.com/tomgermany/gladys-transitous-departures';
 
+/**
+ * Wandelt unterschiedliche Zeitangaben der API in Unix-Millisekunden um.
+ * Sekundenwerte werden dabei automatisch in Millisekunden umgerechnet.
+ */
 function getEpoch(value) {
   if (typeof value === 'number') {
     return value > 1e12 ? value : value * 1000;
@@ -20,6 +25,9 @@ function getRawTime(item) {
   return item.departure ?? item.scheduled ?? item.place?.departure ?? null;
 }
 
+/**
+ * Formatiert einen Zeitpunkt in der lokalen Zeitzone der Haltestelle.
+ */
 function formatLocalTime(epochMs, timeZone) {
   if (!timeZone) return null;
 
@@ -35,6 +43,9 @@ function formatLocalTime(epochMs, timeZone) {
   }
 }
 
+/**
+ * Berechnet die Luftlinienentfernung zwischen zwei Koordinaten in Metern.
+ */
 function haversineMeters(lat1, lon1, lat2, lon2) {
   const radians = (degrees) => (degrees * Math.PI) / 180;
   const dLat = radians(lat2 - lat1);
@@ -42,40 +53,56 @@ function haversineMeters(lat1, lon1, lat2, lon2) {
 
   const a =
     Math.sin(dLat / 2) ** 2 +
-    Math.cos(radians(lat1)) * Math.cos(radians(lat2)) * Math.sin(dLon / 2) ** 2;
+    Math.cos(radians(lat1)) *
+      Math.cos(radians(lat2)) *
+      Math.sin(dLon / 2) ** 2;
 
   return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-
+/**
+ * Ordnet Verkehrsmittel einer gemeinsamen Farbgruppe zu.
+ *
+ * Die Kategorien werden später in widgets.js für die Farben
+ * der Haltestellen-Badges und der Abfahrtskacheln verwendet.
+ *
+ * Unbekannte Verkehrsmittel erhalten keine Kategorie.
+ */
 function modeCategory(mode) {
-  if (['BUS', 'ODM'].includes(mode)) return 'BUS';
+  if (mode === 'BUS') return 'BUS';
 
-  if (['TRAM', 'SUBWAY'].includes(mode)) return 'TRAM';
-
-  if (
-    [
-      'RAIL',
-      'REGIONAL_RAIL',
-      'REGIONAL_FAST_RAIL',
-      'SUBURBAN',
-      'HIGHSPEED_RAIL',
-      'HIGH_SPEED_RAIL',
-      'LONG_DISTANCE',
-      'NIGHT_RAIL',
-    ].includes(mode)
-  ) {
-    return 'RAIL';
+  if ([
+    'RAIL',
+    'REGIONAL_RAIL',
+    'REGIONAL_FAST_RAIL',
+    'SUBURBAN',
+  ].includes(mode)) {
+    return 'REGIONAL';
   }
 
-  if (mode === 'FERRY') return 'FERRY';
-  if (mode === 'FUNICULAR') return 'CableCar';
-  if (mode === 'AIRPLANE') return 'FLUG';
+  if (['ODM', 'FERRY', 'AIRPLANE', 'FUNICULAR'].includes(mode)) {
+    return 'SPECIAL';
+  }
+
+  if (['TRAM', 'SUBWAY'].includes(mode)) {
+    return 'URBAN';
+  }
+
+  if ([
+    'HIGHSPEED_RAIL',
+    'HIGH_SPEED_RAIL',
+    'LONG_DISTANCE',
+    'NIGHT_RAIL',
+  ].includes(mode)) {
+    return 'RAIL';
+  }
 
   return null;
 }
 
-
+/**
+ * Liefert die für die Anzeige vorgesehenen deutschen Verkehrsmittel-Kürzel.
+ */
 function displayedMode(mode) {
   if (mode === 'FERRY') return 'FÄHRE';
   if (mode === 'SUBWAY') return 'U-BAHN';
@@ -93,9 +120,15 @@ function displayedMode(mode) {
   return mode || 'UNKNOWN';
 }
 
-
-
-function normalizeDeparture(item, selectedStopName) {
+/**
+ * Vereinheitlicht eine Abfahrt für die weitere Verarbeitung.
+ *
+ * Die Kategorie richtet sich grundsätzlich nach dem tatsächlichen
+ * Verkehrsmittel der Abfahrt. Die Kategorie der ausgewählten Haltestelle
+ * dient nur als Rückfallwert, falls das Verkehrsmittel nicht zugeordnet
+ * werden kann.
+ */
+function normalizeDeparture(item, selectedStopName, selectedCategory) {
   const place = item.place ?? {};
   const epochMs = getEpoch(getRawTime(item));
   const mode = item.mode || 'UNKNOWN';
@@ -108,6 +141,7 @@ function normalizeDeparture(item, selectedStopName) {
     stopId: place.stopId || null,
     mode,
     displayedMode: displayedMode(mode),
+    category: modeCategory(mode) || selectedCategory || null,
     line: item.routeShortName || item.route?.shortName || '',
     destination: item.headsign || item.tripTo || '',
     status: item.cancelled ? 'CANCELLED' : item.realtime ? 'REALTIME' : 'SCHEDULED',
@@ -115,7 +149,18 @@ function normalizeDeparture(item, selectedStopName) {
   };
 }
 
-async function transitousQuery({ lat, lon, radius, stopId, n = 100, contact = DEFAULT_CONTACT }) {
+/**
+ * Ruft Abfahrten entweder für einen konkreten Haltestellen-Identifier
+ * oder für einen geografischen Suchbereich ab.
+ */
+async function transitousQuery({
+  lat,
+  lon,
+  radius,
+  stopId,
+  n = 100,
+  contact = DEFAULT_CONTACT,
+}) {
   const params = new URLSearchParams({
     n: String(n),
     language: 'en',
@@ -155,9 +200,8 @@ async function transitousQuery({ lat, lon, radius, stopId, n = 100, contact = DE
  * lat: Breitengrad
  * lon: Längengrad
  * radius: Suchradius in Metern
- * count: Anzahl der Abfahrten (5 bis 8)
+ * count: Anzahl der Abfahrten (3 oder 6)
  */
-
 export async function getDepartures({
   lat,
   lon,
@@ -185,12 +229,13 @@ export async function getDepartures({
     throw new Error('Der Suchradius muss zwischen 1 und 50000 Metern liegen.');
   }
 
+  // Es werden ausschließlich drei oder sechs Abfahrten angeboten.
+  // Ungültige Werte werden auf den Standardwert sechs zurückgesetzt.
   if (![3, 6].includes(count)) {
-  count = 6;
-}
+    count = 6;
+  }
 
   // 1. Haltestellen im gewählten Umkreis suchen.
-
   const initial = await transitousQuery({
     lat,
     lon,
@@ -228,7 +273,10 @@ export async function getDepartures({
     }
   }
 
-  const selected = [...nearestByCategory.values()];
+  // Die ausgewählten Haltestellen werden nach Luftlinienentfernung sortiert.
+  const selected = [...nearestByCategory.values()].sort(
+    (a, b) => a.distance - b.distance,
+  );
 
   if (selected.length === 0) {
     return {
@@ -239,38 +287,41 @@ export async function getDepartures({
   }
 
   // 3. Abfahrten der ausgewählten Haltestellen gezielt abrufen.
-  const uniqueStops = [...new Map(selected.map((stop) => [stop.stopId, stop])).values()];
+  // Dieselbe Haltestelle wird nur einmal abgefragt, auch wenn sie
+  // für mehrere Verkehrsmittelkategorien ausgewählt wurde.
+  const uniqueStops = [
+    ...new Map(selected.map((stop) => [stop.stopId, stop])).values(),
+  ];
 
-
-const results = await Promise.all(
-  uniqueStops.map(async (stop) => ({
-    stopName: stop.stopName,
-    stopTimes: await transitousQuery({
-      lat,
-      lon,
-      radius,
-      stopId: stop.stopId,
-      n: 100,
-      contact,
-    }),
-  })),
-);
-
+  const results = await Promise.all(
+    uniqueStops.map(async (stop) => ({
+      stopName: stop.stopName,
+      category: stop.category,
+      stopTimes: await transitousQuery({
+        lat,
+        lon,
+        radius,
+        stopId: stop.stopId,
+        n: 100,
+        contact,
+      }),
+    })),
+  );
 
   // 4. Zeiten vereinheitlichen, vergangene Abfahrten entfernen
   // und chronologisch sortieren.
+  // Die Kategorie wird dabei an jede Abfahrt weitergegeben.
+  // Die tatsächliche Kategorie des Verkehrsmittels hat Vorrang.
   const now = Date.now();
 
-
-const normalized = results
-  .flatMap((result) =>
-    result.stopTimes.map((item) =>
-      normalizeDeparture(item, result.stopName),
-    ),
-  )
-  .filter((item) => item.epochMs !== null && item.epochMs >= now - 60_000)
-  .sort((a, b) => a.epochMs - b.epochMs);
-
+  const normalized = results
+    .flatMap((result) =>
+      result.stopTimes.map((item) =>
+        normalizeDeparture(item, result.stopName, result.category),
+      ),
+    )
+    .filter((item) => item.epochMs !== null && item.epochMs >= now - 60_000)
+    .sort((a, b) => a.epochMs - b.epochMs);
 
   // 5. Doppelte Abfahrten entfernen und gewünschte Anzahl auswählen.
   const seen = new Set();
