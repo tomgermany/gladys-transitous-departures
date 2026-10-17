@@ -141,7 +141,7 @@ function getRadiusButtonLabel(language, radius, direction) {
 function addRadiusButton(components, settings, language, currentRadius) {
   const steps = getRadiusSteps(settings);
 
-  // Bei nur einer möglichen Stufe ist kein Radius-Button erforderlich.
+  // Bei nur einer möglichen Radiusstufe keinen Button anzeigen.
   if (steps.length < 2) return;
 
   const radiusKey = getRadiusKey(settings);
@@ -150,14 +150,18 @@ function addRadiusButton(components, settings, language, currentRadius) {
     direction: 'forward',
   };
 
-  const currentIndex = Math.max(0, steps.indexOf(savedState.radius));
+  // Ungültige gespeicherte Zustände auf den aktuellen Radius zurücksetzen.
+  const savedIndex = steps.indexOf(savedState.radius);
+  const currentIndex = savedIndex >= 0
+    ? savedIndex
+    : Math.max(0, steps.indexOf(currentRadius));
 
-  // An den Endpunkten automatisch die Richtung wechseln.
+  // An den Endpunkten die Suchrichtung umkehren.
   let direction = savedState.direction;
 
-  if (currentIndex >= steps.length - 1) {
+  if (currentIndex === steps.length - 1) {
     direction = 'backward';
-  } else if (currentIndex <= 0) {
+  } else if (currentIndex === 0) {
     direction = 'forward';
   }
 
@@ -165,17 +169,15 @@ function addRadiusButton(components, settings, language, currentRadius) {
     ? currentIndex - 1
     : currentIndex + 1;
 
-  const targetRadius = steps[targetIndex];
-
   components.push({
     type: 'button',
-    label: getRadiusButtonLabel(language, targetRadius, direction),
+    label: getRadiusButtonLabel(language, steps[targetIndex], direction),
     icon: 'search',
     style: 'secondary',
     action: {
       key: 'change_radius',
       params: {
-        radius: targetRadius,
+        radius: steps[targetIndex],
         direction,
       },
     },
@@ -385,41 +387,46 @@ export const WIDGETS = {
         return { ttl_seconds: ttlSeconds, components };
       }
     },
-
     async action(gladys, { actionKey, params = {}, settings = {} }) {
-      // Nur die Aktion zum Ändern des Suchradius behandeln.
       if (actionKey !== 'change_radius') return;
 
       const radiusKey = getRadiusKey(settings);
       const steps = getRadiusSteps(settings);
       const requestedRadius = Number(params.radius);
+      const requestedIndex = steps.indexOf(requestedRadius);
 
-      // Nur eine der konfigurierten Radiusstufen zulassen.
-      if (!steps.includes(requestedRadius)) return;
+      // Nur gültige Radiusstufen akzeptieren.
+      if (requestedIndex < 0) return;
 
       const currentState = expandedRadii.get(radiusKey) ?? {
         radius: steps[0],
         direction: 'forward',
       };
 
-      const currentIndex = Math.max(0, steps.indexOf(currentState.radius));
-      const requestedIndex = steps.indexOf(requestedRadius);
+      const currentIndex = steps.indexOf(currentState.radius);
 
-      // Der angeforderte Schritt muss genau neben dem aktuellen liegen.
-      if (Math.abs(requestedIndex - currentIndex) !== 1) return;
+      // Der Button darf nur zur direkt benachbarten Stufe wechseln.
+      if (
+        currentIndex < 0 ||
+        Math.abs(requestedIndex - currentIndex) !== 1
+      ) {
+        return;
+      }
 
-      // Nach dem letzten Schritt wird beim nächsten Klick zurückgeschaltet;
-      // am ersten Schritt geht es wieder vorwärts.
-      const direction = requestedIndex < currentIndex ? 'backward' : 'forward';
-      const nextDirection = requestedIndex >= steps.length - 1
-        ? 'backward'
-        : requestedIndex <= 0
-          ? 'forward'
-          : direction;
+      // An der größten Stufe zurück, an der kleinsten wieder vorwärts.
+      let direction = requestedIndex > currentIndex
+        ? 'forward'
+        : 'backward';
+
+      if (requestedIndex === steps.length - 1) {
+        direction = 'backward';
+      } else if (requestedIndex === 0) {
+        direction = 'forward';
+      }
 
       expandedRadii.set(radiusKey, {
         radius: requestedRadius,
-        direction: nextDirection,
+        direction,
       });
     },
   },
