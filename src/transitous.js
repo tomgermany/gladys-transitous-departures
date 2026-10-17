@@ -47,6 +47,7 @@ function haversineMeters(lat1, lon1, lat2, lon2) {
   return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+
 function modeCategory(mode) {
   if (['BUS', 'ODM'].includes(mode)) return 'BUS';
 
@@ -69,14 +70,17 @@ function modeCategory(mode) {
 
   if (mode === 'FERRY') return 'FERRY';
   if (mode === 'FUNICULAR') return 'CableCar';
+  if (mode === 'AIRPLANE') return 'FLUG';
 
   return null;
 }
+
 
 function displayedMode(mode) {
   if (mode === 'FERRY') return 'FÄHRE';
   if (mode === 'SUBWAY') return 'U-BAHN';
   if (mode === 'SUBURBAN') return 'S-BAHN';
+  if (mode === 'AIRPLANE') return 'FLUG';
 
   if (['HIGHSPEED_RAIL', 'HIGH_SPEED_RAIL', 'LONG_DISTANCE'].includes(mode)) {
     return 'FERN';
@@ -88,6 +92,7 @@ function displayedMode(mode) {
 
   return mode || 'UNKNOWN';
 }
+
 
 
 function normalizeDeparture(item, selectedStopName) {
