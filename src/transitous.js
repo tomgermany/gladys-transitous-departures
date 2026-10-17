@@ -228,7 +228,9 @@ export async function getDepartures({
     }
   }
 
-  const selected = [...nearestByCategory.values()];
+  const selected = [...nearestByCategory.values()].sort(
+  (a, b) => a.distance - b.distance,
+);
 
   if (selected.length === 0) {
     return {
