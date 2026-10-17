@@ -71,6 +71,74 @@ const getMessages = (language) => {
   return messages[lang] || messages.de;
 };
 
+const RADII = [500, 2000, 5000, 10000];
+
+const expandedRadii = new Map();
+
+function getRadiusKey(settings) {
+  return JSON.stringify({
+    house: settings.house ?? '',
+    latitude: settings.latitude ?? '',
+    longitude: settings.longitude ?? '',
+    radius: Number(settings.radius ?? 2000),
+  });
+}
+
+function getNextRadius(radius) {
+  const index = RADII.indexOf(Number(radius));
+
+  if (index < 0 || index >= RADII.length - 1) {
+    return null;
+  }
+
+  return RADII[index + 1];
+}
+
+function formatRadius(radius) {
+  return radius < 1000
+    ? `${radius} m`
+    : `${radius / 1000} km`;
+}
+
+function getRadiusButtonLabel(language, radius) {
+  const lang = String(language ?? 'de')
+    .slice(0, 2)
+    .toLowerCase();
+
+  const distance = formatRadius(radius);
+
+  const labels = {
+    de: `Weiter suchen: ${distance}`,
+    en: `Search farther: ${distance}`,
+    es: `Ampliar radio: ${distance}`,
+    fr: `Élargir rayon : ${distance}`,
+    ko: `반경 확대: ${distance}`,
+    kl: `Ujaasinerup annertusinerani: ${distance}`,
+  };
+
+  return labels[lang] || labels.de;
+}
+
+function addRadiusButton(components, radius, language) {
+  const nextRadius = getNextRadius(radius);
+
+  if (nextRadius === null) {
+    return;
+  }
+
+  components.push({
+    type: 'button',
+    label: getRadiusButtonLabel(language, nextRadius),
+    icon: 'search',
+    style: 'secondary',
+    action: {
+      key: 'expand_radius',
+      params: {
+        nextRadius,
+      },
+    },
+  });
+}
 
 function shortText(value, maxLength) {
   const result = String(value ?? '').trim();
@@ -84,7 +152,9 @@ export const WIDGETS = {
       let latitude;
       let longitude;
 
-      const radius = Number(settings.radius ?? 2000);
+      const baseRadius = Number(settings.radius ?? 2000);
+      const radiusKey = getRadiusKey(settings);
+      const radius = expandedRadii.get(radiusKey) ?? baseRadius;
       const count = Number(settings.count ?? 6);
       const refreshMinutes = Number(settings.refresh_minutes ?? 30);
 
@@ -189,6 +259,9 @@ export const WIDGETS = {
           components.push(
             text(t.noDepartures)
           );
+
+          addRadiusButton(components, radius, language);
+
           return { ttl_seconds: ttlSeconds, components };
         }
 
@@ -240,13 +313,34 @@ export const WIDGETS = {
             };
           }),
         );
-
+        addRadiusButton(components, radius, language);
         return { ttl_seconds: ttlSeconds, components };
       } catch {
         components.push(text(t.transitousError));
 
+        addRadiusButton(components, radius, language);
+
         return { ttl_seconds: ttlSeconds, components };
       }
+    },
+
+    async action(gladys, { actionKey, params = {}, settings = {} }) {
+      if (actionKey !== 'expand_radius') {
+        return;
+      }
+
+      const radiusKey = getRadiusKey(settings);
+      const currentRadius =
+        expandedRadii.get(radiusKey) ?? Number(settings.radius ?? 2000);
+
+      const nextRadius = getNextRadius(currentRadius);
+      const requestedRadius = Number(params.nextRadius);
+
+      if (nextRadius === null || requestedRadius !== nextRadius) {
+        return;
+      }
+
+      expandedRadii.set(radiusKey, nextRadius);
     },
   },
 };
