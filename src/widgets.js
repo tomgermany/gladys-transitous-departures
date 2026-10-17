@@ -93,6 +93,12 @@ function getNextRadius(radius) {
 
   return RADII[index + 1];
 }
+// Den vorherigen Suchradius ermitteln.
+// Gibt null zurück, wenn der kleinste Radius bereits erreicht ist.
+function getPreviousRadius(radius) {
+  const index = RADII.indexOf(Number(radius));
+  return index > 0 ? RADII[index - 1] : null;
+}
 
 function formatRadius(radius) {
   return radius < 1000
@@ -119,26 +125,66 @@ function getRadiusButtonLabel(language, radius) {
   return labels[lang] || labels.de;
 }
 
+
+function getPreviousRadiusButtonLabel(language, radius) {
+  const lang = String(language ?? 'de')
+    .slice(0, 2)
+    .toLowerCase();
+
+  const distance = formatRadius(radius);
+
+  // Beschriftung für den Button zum Verkleinern des Suchradius.
+  const labels = {
+    de: `Zurück: ${distance}`,
+    en: `Search closer: ${distance}`,
+    es: `Reducir radio: ${distance}`,
+    fr: `Réduire le rayon : ${distance}`,
+    ko: `반경 축소: ${distance}`,
+    kl: `Ujaasinerup annikillinerani: ${distance}`,
+  };
+
+  return labels[lang] || labels.de;
+}
+
+
+
 function addRadiusButton(components, radius, language) {
+  const previousRadius = getPreviousRadius(radius);
   const nextRadius = getNextRadius(radius);
 
-  if (nextRadius === null) {
-    return;
+  // Wenn ein kleinerer Radius existiert, den Zurück-Button anzeigen.
+  if (previousRadius !== null) {
+    components.push({
+      type: 'button',
+      label: getPreviousRadiusButtonLabel(language, previousRadius),
+      icon: 'search',
+      style: 'secondary',
+      action: {
+        key: 'change_radius',
+        params: {
+          radius: previousRadius,
+        },
+      },
+    });
   }
 
-  components.push({
-    type: 'button',
-    label: getRadiusButtonLabel(language, nextRadius),
-    icon: 'search',
-    style: 'secondary',
-    action: {
-      key: 'expand_radius',
-      params: {
-        nextRadius,
+  // Wenn ein größerer Radius existiert, den Weiter-Button anzeigen.
+  if (nextRadius !== null) {
+    components.push({
+      type: 'button',
+      label: getRadiusButtonLabel(language, nextRadius),
+      icon: 'search',
+      style: 'secondary',
+      action: {
+        key: 'change_radius',
+        params: {
+          radius: nextRadius,
+        },
       },
-    },
-  });
+    });
+  }
 }
+
 
 function shortText(value, maxLength) {
   const result = String(value ?? '').trim();
@@ -318,11 +364,25 @@ export const WIDGETS = {
         addRadiusButton(components, radius, language);
 
         // Gladys erlaubt maximal acht Komponenten pro Widget.
-        // Bei sechs Abfahrten können es mit Überschrift, Haltestellenliste
-        // und Button insgesamt neun Komponenten werden.
-        // Deshalb entfernen wir nur dann die Überschrift, wenn sie zu viel Platz belegt.
+        // Zuerst die Überschrift entfernen, wenn sie zu viel Platz belegt.
         if (components.length > 8) {
           components.shift();
+        }
+
+        // Falls zwei Radius-Buttons angezeigt werden, kann es weiterhin
+        // zu viele Komponenten geben. Dann einzelne Abfahrtskacheln entfernen,
+        // bis das Widget die Grenze von acht Komponenten einhält.
+        while (components.length > 8) {
+          const departureIndex = components.findIndex(
+            (component) => component.type === 'value',
+          );
+
+          // Keine Abfahrtskachel mehr zum Entfernen gefunden.
+          if (departureIndex === -1) {
+            break;
+          }
+
+          components.splice(departureIndex, 1);
         }
 
         // Das fertige Widget mit allen übrigen Komponenten zurückgeben.
@@ -337,26 +397,40 @@ export const WIDGETS = {
       }
     },
 
-    async action(gladys, { actionKey, params = {}, settings = {} }) {
-      if (actionKey !== 'expand_radius') {
-        return;
-      }
+    
+  async action(gladys, { actionKey, params = {}, settings = {} }) {
+    // Nur Aktionen zum Ändern des Suchradius verarbeiten.
+    if (actionKey !== 'change_radius') {
+      return;
+    }
 
-      const radiusKey = getRadiusKey(settings);
-      const currentRadius =
-        expandedRadii.get(radiusKey) ?? Number(settings.radius ?? 2000);
+    // Den aktuellen Radius für dieses Widget ermitteln.
+    const radiusKey = getRadiusKey(settings);
+    const currentRadius =
+      expandedRadii.get(radiusKey) ?? Number(settings.radius ?? 2000);
 
-      const nextRadius = getNextRadius(currentRadius);
-      const requestedRadius = Number(params.nextRadius);
+    // Ermitteln, welche beiden Radius-Schritte erlaubt sind.
+    const previousRadius = getPreviousRadius(currentRadius);
+    const nextRadius = getNextRadius(currentRadius);
 
-      if (nextRadius === null || requestedRadius !== nextRadius) {
-        return;
-      }
+    // Den vom Button angeforderten Radius auslesen.
+    const requestedRadius = Number(params.radius);
 
-      expandedRadii.set(radiusKey, nextRadius);
-    },
+    // Nur einen direkten Schritt nach vorne oder hinten zulassen.
+    if (
+      requestedRadius !== previousRadius &&
+      requestedRadius !== nextRadius
+    ) {
+      return;
+    }
+
+    // Den neuen Radius setzen. Die nächste Widget-Ausführung
+    // führt die Suche mit diesem Radius erneut aus.
+    expandedRadii.set(radiusKey, requestedRadius);
   },
+},
 };
+
 
 export function refreshWidgets(gladys) {
   for (const key of Object.keys(WIDGETS)) {
