@@ -29,6 +29,15 @@ const messages = {
     noDepartures: 'No departures were found within the selected radius.',
     transitousError: 'Transitous is currently unreachable. Please check your internet connection. The widget will try again at the next refresh.',
   },
+  es:{
+    heading: 'Salidas del transporte público cercano',
+    houseLoadError: 'No se han podido cargar las coordenadas de la casa Gladys seleccionada.',
+    invalidLocation: 'Selecciona una vivienda Gladys con coordenadas registradas o introduce manualmente la latitud y la longitud.',
+    noStops: 'No se han encontrado paradas en el radio seleccionado.',
+    noDepartures: 'No se han encontrado salidas en el radio seleccionado.',
+    unknownDestination: 'Destino desconocido',
+    transitousError: 'Transitous no está disponible en este momento. Comprueba tu conexión a Internet. El widget lo volverá a intentar en la próxima actualización.',    
+  },
   fr: {
     heading: 'Départs des transports en commun à proximité',
     houseLoadError: 'Impossible de charger les coordonnées de la maison Gladys sélectionnée.',
