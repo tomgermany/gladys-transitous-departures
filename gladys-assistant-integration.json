@@ -1,4 +1,4 @@
-{
+ {
   "manifest_version": 1,
   "type": "provider",
   "name": "Transitous Departures",
@@ -6,9 +6,7 @@
     "en": "Nearby public transport departures on the Gladys dashboard, powered by Transitous.",
     "es": "Próximas salidas de transporte público en el panel de Gladys, con tecnología de Transitous.",
     "de": "ÖPNV-Abfahrten in der Nähe im Gladys-Dashboard, bereitgestellt von Transitous.",
-    "fr": "Départs des transports publics à proximité sur le tableau de bord Gladys, grâce à Transitous.",
-    "ko": "Transitous 연동 Gladys 대시보드 주변 대중교통 출발 정보.",
-    "kl": "Gladys-ip saqqaani qanitsumi qatserisut aallartarneri, Transitous atorlugu."
+    "fr": "Départs des transports publics à proximité sur le tableau de bord Gladys, grâce à Transitous."
   },
   "version": "1.5.1",
   "docker_image": "ghcr.io/tomgermany/gladys-transitous-departures:1.5.1",
@@ -24,17 +22,13 @@
       "label": {
         "de": "Hinweis zur Einrichtung",
         "en": "Widget setup information",
-        "fr": "Informations de configuration du widget",
-        "ko": "위젯 설정 정보",
-        "kl": "Widgetip ikkunnissaanut paasissutissat"
+        "fr": "Informations de configuration du widget"
       },
       "description": {
         "de": "Bitte legen Sie vor dem Hinzufügen des Widgets zum Dashboard die Koordinaten Ihres gewünschten Standorts fest. Benötigt werden Breitengrad und Längengrad im Dezimalformat, zum Beispiel 49.350 und 8.690. Beim Hinzufügen des Widgets stellen Sie anschließend Suchradius, Anzahl der Abfahrten und Aktualisierungsintervall ein. Der Standard-Suchradius beträgt 2.000 Meter.",
         "es": "Antes de añadir el widget al panel de control, especifique las coordenadas de la ubicación deseada. Se necesitan la latitud y la longitud en formato decimal, por ejemplo, 49,350 y 8,690. Al añadir el widget, configure a continuación el radio de búsqueda, el número de salidas y el intervalo de actualización. El radio de búsqueda predeterminado es de 2.000 metros.",
         "en": "Before adding the widget to your dashboard, determine the coordinates of your chosen location. You need latitude and longitude in decimal format, for example 49.350 and 8.690. When adding the widget, you can then configure the search radius, number of departures and refresh interval. The default search radius is 2,000 metres.",
-        "fr": "Avant d’ajouter le widget à votre tableau de bord, déterminez les coordonnées du lieu choisi. Vous avez besoin de la latitude et de la longitude au format décimal, par exemple 49.350 and 8.690. Lors de l’ajout du widget, vous pourrez définir le rayon de recherche, le nombre de départs et l’intervalle d’actualisation. Le rayon de recherche par défaut est de 2 000 mètres.",
-        "ko": "위젯을 대시보드에 추가하기 전에 원하는 위치의 좌표를 설정해 주세요. 위도와 경도는 49.350 및 8.690과 같이 십진수 형식이어야 합니다. 위젯을 추가할 때 검색 반경, 출발 횟수, 새로고침 간격을 설정할 수 있습니다. 기본 검색 반경은 2,000미터입니다.",
-        "kl": "Widgeti saqqamut ilanngutinnagu sumiiffiup kissaatigineqartup nalaat aalajangikkit. Tikkuutit decimalitut pisariaqarput, assersuutigalugu 49.350 aamma 8.690. Widgeti ilanngukkukku ujaasiffiup avatangiisia, aallartarnerit qassiunissaat nutarternerullu piffissaa aalajangersinnaavat. Ujaasiffiup avatangiisia nalinginnaasoq 2.000 meteriugajuppoq."
+        "fr": "Avant d’ajouter le widget à votre tableau de bord, déterminez les coordonnées du lieu choisi. Vous avez besoin de la latitude et de la longitude au format décimal, par exemple 49.350 et 8.690. Lors de l’ajout du widget, vous pourrez définir le rayon de recherche, le nombre de départs et l’intervalle d’actualisation. Le rayon de recherche par défaut est de 2 000 mètres."
       }
     }
   ],
@@ -45,17 +39,13 @@
         "en": "Nearby transit departures",
         "es": "Salidas de transporte público cercanas",
         "de": "ÖPNV-Abfahrten in der Nähe",
-        "fr": "Départs à proximité",
-        "ko": "주변 대중교통 출발",
-        "kl": "Qanitsumi angallatit aallartarfii"
+        "fr": "Départs à proximité"
       },
       "description": {
         "en": "Next public transport departures around a chosen location.",
         "es": "Próximas salidas del transporte público cerca de la ubicación seleccionada.",
         "de": "Die nächsten ÖPNV-Abfahrten an einem frei wählbaren Standort.",
-        "fr": "Les prochains départs des transports publics autour d'un lieu choisi.",
-        "ko": "선택한 위치 주변의 다음 대중교통 출발 정보.",
-        "kl": "Sumiiffiup toqqakkap eqqaani angallatit aallarnissaat tulliuttut."
+        "fr": "Les prochains départs des transports publics autour d'un lieu choisi."
       },
       "icon": "map-pin",
       "settings": [
@@ -67,9 +57,7 @@
             "en": "Select a Gladys house (optional)",
             "es": "Selecciona una casa de Gladys (opcional)",
             "de": "Gladys-Haus auswählen (optional)",
-            "fr": "Choisir une maison Gladys (facultatif)",
-            "ko": "Gladys 집 선택 (선택 사항)",
-            "kl": "Gladys-illu toqqaruk (piumagukku)"
+            "fr": "Choisir une maison Gladys (facultatif)"
           }
         },
         {
@@ -79,17 +67,13 @@
             "en": "Latitude",
             "es": "Latitud",
             "de": "Breitengrad",
-            "fr": "Latitude",
-            "ko": "위도",
-            "kl": "Sanimut tikeq (Latitude)"
+            "fr": "Latitude"
           },
           "placeholder": {
             "en": "e.g. 49.350",
             "es": "p. ej., 49 350",
             "de": "z.B. 49.350",
-            "fr": "ex. 49.350",
-            "ko": "예: 49.350",
-            "kl": "ass. 49.350"
+            "fr": "ex. 49.350"
           },
           "required": false,
           "min": -90,
@@ -102,17 +86,13 @@
             "en": "Longitude",
             "es": "Longitud",
             "de": "Längengrad",
-            "fr": "Longitude",
-            "ko": "경도",
-            "kl": "Ammitut tikeq (Longitude)"
+            "fr": "Longitude"
           },
           "placeholder": {
             "en": "e.g. 8.690",
             "es": "p. ej., 49 350",
             "de": "z. B. 8.690",
-            "fr": "ex. 8.690",
-            "ko": "예: 8.690",
-            "kl": "ass. 8.690"
+            "fr": "ex. 8.690"
           },
           "required": false,
           "min": -180,
@@ -125,9 +105,7 @@
             "en": "Search radius (metres)",
             "es": "Radio de búsqueda (metros)",
             "de": "Suchradius (Meter)",
-            "fr": "Rayon de recherche (mètres)",
-            "ko": "검색 반경 (미터)",
-            "kl": "Ujaasiffiup avatangiisia (meterit)"
+            "fr": "Rayon de recherche (mètres)"
           },
           "required": true,
           "default": 2000,
@@ -141,34 +119,28 @@
             "en": "Number of departures",
             "es": "Número de salidas",
             "de": "Anzahl der Abfahrten",
-            "fr": "Nombre de départs",
-            "ko": "출발 정보 개수",
-            "kl": "Aallartarnerit qassiunissaat"
+            "fr": "Nombre de départs"
           },
           "required": true,
           "default": "6",
           "options": [
-            {
-              "value": "3",
-              "label": {
-                "en": "3",
-                "de": "3",
-                "fr": "3",
-                "ko": "3",
-                "kl": "3"
-              }
-            },
-            {
-              "value": "6",
-              "label": {
-                "en": "6",
-                "de": "6",
-                "fr": "6",
-                "ko": "6",
-                "kl": "6"
-              }
-            }
-          ]
+                {
+                "value": "3",
+                "label": {
+                        "en": "3",
+                        "de": "3",
+                        "fr": "3"
+                        }
+                  },
+                  {
+                  "value": "6",
+                  "label": {
+                         "en": "6",
+                          "de": "6",
+                          "fr": "6"
+                          }
+                    }
+                ]
         },
         {
           "key": "refresh_minutes",
@@ -177,9 +149,7 @@
             "en": "Refresh interval",
             "es": "Intervalo de actualización",
             "de": "Aktualisierungsintervall",
-            "fr": "Intervalle d'actualisation",
-            "ko": "새로고침 간격",
-            "kl": "Nutarternerup piffissaa"
+            "fr": "Intervalle d'actualisation"
           },
           "required": true,
           "default": "30",
@@ -190,9 +160,7 @@
                 "en": "10 minutes",
                 "es": "10 minutos",
                 "de": "10 Minuten",
-                "fr": "10 minutes",
-                "ko": "10분",
-                "kl": "Minutsit 10"
+                "fr": "10 minutes"
               }
             },
             {
@@ -201,20 +169,16 @@
                 "en": "20 minutes",
                 "es": "20 minutos",
                 "de": "20 Minuten",
-                "fr": "20 minutes",
-                "ko": "20분",
-                "kl": "Minutsit 20"
+                "fr": "20 minutes"
               }
             },
             {
               "value": "30",
               "label": {
-                "en": "30 minutes",
+                "en": "30 minute",
                 "es": "30 minutos",
                 "de": "30 Minuten",
-                "fr": "30 minutes",
-                "ko": "30분",
-                "kl": "Minutsit 30"
+                "fr": "30 minutes"
               }
             },
             {
@@ -223,9 +187,7 @@
                 "en": "40 minutes",
                 "es": "40 minutos",
                 "de": "40 Minuten",
-                "fr": "40 minutes",
-                "ko": "40분",
-                "kl": "Minutsit 40"
+                "fr": "40 minutes"
               }
             },
             {
@@ -234,9 +196,7 @@
                 "en": "50 minutes",
                 "es": "50 minutos",
                 "de": "50 Minuten",
-                "fr": "50 minutes",
-                "ko": "50분",
-                "kl": "Minutsit 50"
+                "fr": "50 minutes"
               }
             },
             {
@@ -245,9 +205,7 @@
                 "en": "60 minutes",
                 "es": "60 minutos",
                 "de": "60 Minuten",
-                "fr": "60 minutes",
-                "ko": "1시간",
-                "kl": "Minutsit 60"
+                "fr": "60 minutes"
               }
             }
           ]
@@ -259,4 +217,17 @@
             "en": "Contact for Transitous (email or website)",
             "es": "Datos de contacto de Transitous (correo electrónico o página web)",
             "de": "Kontakt für Transitous (E-Mail oder Website)",
-            "fr": "Contact pour Transitous (e-mail ou site web)",
+            "fr": "Contact pour Transitous (e-mail ou site web)"
+          },
+          "placeholder": {
+            "en": "e.g. https://github.com/tomgermany/gladys-transitous-departures",
+            "es": "Por ejemplo: https://github.com/tomgermany/gladys-transitous-departures",
+            "de": "z. B. https://github.com/tomgermany/gladys-transitous-departures",
+            "fr": "ex. https://github.com/tomgermany/gladys-transitous-departures"
+          },
+          "required": true
+        }
+      ]
+    }
+  ]
+}
