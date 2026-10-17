@@ -3,7 +3,9 @@
 ## You need:
 
 Gladys Assistent > Version 5.2
+
 External Integration Transitous Depatures
+
 Internet Access for Your Gladys Assistant Installation
 
 ## You get:
