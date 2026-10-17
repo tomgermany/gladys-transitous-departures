@@ -13,4 +13,4 @@ Ein Beispiel mit Lissabon:
 
 Sie erhalten u.a. die nächsten Abfahrten von  Fähren im Linienverkehr, Seilbahnen im Linienverkehr, Busse, Überlandbusse, Straßenbahnen, Schnellzüge und weitere in einem von ihnen festlegbaren Suchkreis um eine Geolocation.
 
-Übrigens, zur Zeit drei Sprachen Englisch, Deutsch und Französisch
+Übrigens, zur Zeit vier Sprachen Spanisch, Englisch, Deutsch und Französisch
