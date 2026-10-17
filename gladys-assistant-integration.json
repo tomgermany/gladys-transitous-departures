@@ -43,11 +43,11 @@
       "key": "transitous_departures",
       "label": {
         "en": "Nearby transit departures",
-        "es": "Salidas de transporte público cercanas",
+        "es": "Salidas cercanas",
         "de": "ÖPNV-Abfahrten in der Nähe",
         "fr": "Départs à proximité",
         "ko": "주변 대중교통 출발 정보",
-        "kl": "Qanitsumi angallatit aallartarfii"
+        "kl": "Angallatit aallartarfii"
       },
       "description": {
         "en": "Next public transport departures around a chosen location.",
