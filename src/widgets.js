@@ -313,8 +313,21 @@ export const WIDGETS = {
             };
           }),
         );
+        
+        // Den Erweiterungsbutton auch bei gefundenen Abfahrten anzeigen.
         addRadiusButton(components, radius, language);
+
+        // Gladys erlaubt maximal acht Komponenten pro Widget.
+        // Bei sechs Abfahrten können es mit Überschrift, Haltestellenliste
+        // und Button insgesamt neun Komponenten werden.
+        // Deshalb entfernen wir nur dann die Überschrift, wenn sie zu viel Platz belegt.
+        if (components.length > 8) {
+          components.shift();
+        }
+
+        // Das fertige Widget mit allen übrigen Komponenten zurückgeben.
         return { ttl_seconds: ttlSeconds, components };
+
       } catch {
         components.push(text(t.transitousError));
 
