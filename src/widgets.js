@@ -10,9 +10,9 @@ const text = (value, variant = 'body') => ({
 });
 
 /**
- * Zentrale Farbzuordnung für die Verkehrsmittelkategorien.
+ * Zentrale Farb- und Bildzuordnung für die Verkehrsmittelkategorien.
  *
- * Diese Farben werden für die Badges der Abfahrtskarten verwendet.
+ * Diese Farben und Bilder werden für die Badges der Abfahrtskarten verwendet.
  * Ausgefallene Abfahrten erhalten unabhängig von der Kategorie
  * immer die Farbe danger.
  */
@@ -22,6 +22,14 @@ const CATEGORY_COLORS = {
   SPECIAL: 'neutral',
   URBAN: 'warning',
   RAIL: 'primary',
+};
+
+const CATEGORY_IMAGES = {
+  BUS: 'bus_test',
+  REGIONAL: 'bus_test',
+  SPECIAL: 'bus_test',
+  URBAN: 'bus_test',
+  RAIL: 'bus_test',
 };
 
 const messages = {
@@ -232,8 +240,8 @@ function createDepartureCard(departure, distanceByStopId, messages) {
       minute: '2-digit',
     }),
 
-   // Vorläufig für jede Abfahrt dasselbe Testbild verwenden.
-    image: 'bus_test',
+   // Aus der Bildkategorie, dort bei neuen Bilder anpassen und index.js anpassen !!!!!!
+    image: CATEGORY_IMAGES[departure.category] || 'bus_test',
 
     // Die Badge-Farbe übernimmt die bisherige zentrale Farblogik.
     // Ausfälle sind immer rot; ansonsten gilt die Verkehrsmittelkategorie.
