@@ -10,9 +10,9 @@ const text = (value, variant = 'body') => ({
 });
 
 /**
- * Zentrale Farb- und Bildzuordnung für die Verkehrsmittelkategorien.
+ * Zentrale Farbzuordnung für die Verkehrsmittelkategorien.
  *
- * Diese Farben und Bilder werden für die Badges der Abfahrtskarten verwendet.
+ * Diese Farben werden für die Badges der Abfahrtskarten verwendet.
  * Ausgefallene Abfahrten erhalten unabhängig von der Kategorie
  * immer die Farbe danger.
  */
@@ -24,12 +24,22 @@ const CATEGORY_COLORS = {
   RAIL: 'primary',
 };
 
+/**
+ * Bildzuordnung für die Verkehrsmittelkategorien.
+ *
+ * Zunächst verwenden alle Kategorien dasselbe Testbild.
+ * Später kann jede Kategorie einzeln auf ein eigenes Bild umgestellt
+ * werden, beispielsweise RAIL: 'rail-test'.
+ *
+ * Bildschlüssel dürfen nur Kleinbuchstaben, Ziffern und Bindestriche
+ * enthalten. Der Bildschlüssel ist nicht identisch mit dem Dateinamen.
+ */
 const CATEGORY_IMAGES = {
-  BUS: 'bus_test',
-  REGIONAL: 'bus_test',
-  SPECIAL: 'bus_test',
-  URBAN: 'bus_test',
-  RAIL: 'bus_test',
+  BUS: 'bus-test',
+  REGIONAL: 'bus-test',
+  SPECIAL: 'bus-test',
+  URBAN: 'bus-test',
+  RAIL: 'bus-test',
 };
 
 const messages = {
@@ -216,8 +226,11 @@ function shortText(value, maxLength) {
 /**
  * Erstellt eine Abfahrtskarte für die card-list.
  *
- * image wird erst ergänzt, wenn die Bildbereitstellung vorhanden ist.
- * Das SDK-Feld date erhält einen ISO-8601-Zeitstempel.
+ * Das Feld date muss einen ISO-8601-Zeitstempel enthalten.
+ * Gladys kann diesen Zeitpunkt dann in der Benutzerzeitzone darstellen.
+ *
+ * Das Bild wird anhand der Verkehrsmittelkategorie ausgewählt.
+ * Unbekannte Kategorien verwenden bus-test als Fallback.
  */
 function createDepartureCard(departure, distanceByStopId, messages) {
   const cancelled = departure.status === 'CANCELLED';
@@ -234,16 +247,12 @@ function createDepartureCard(departure, distanceByStopId, messages) {
       ? { subtitle: `${distance} m` }
       : {}),
 
-    // Absoluter Zeitpunkt. Gladys kann ihn in der Benutzerzeitzone darstellen.
-   date: new Date(departure.epochMs).toLocaleTimeString('de-DE', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
+    // Vollständiger ISO-8601-Zeitstempel statt einer formatierten Uhrzeit.
+    date: new Date(departure.epochMs).toISOString(),
 
-   // Aus der Bildkategorie, dort bei neuen Bilder anpassen und index.js anpassen !!!!!!
-    image: CATEGORY_IMAGES[departure.category] || 'bus_test',
+    // Bildschlüssel aus der zentralen Kategoriezuordnung.
+    image: CATEGORY_IMAGES[departure.category] || 'bus-test',
 
-    // Die Badge-Farbe übernimmt die bisherige zentrale Farblogik.
     // Ausfälle sind immer rot; ansonsten gilt die Verkehrsmittelkategorie.
     badge: {
       text: shortText(line || messages.unknownDestination, 16),
@@ -467,3 +476,4 @@ export function refreshWidgets(gladys) {
     gladys.requestWidgetRefresh(key);
   }
 }
+
