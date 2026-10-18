@@ -1,4 +1,3 @@
-
 import { getDepartures } from './transitous.js';
 
 export const TRANSITOUS_DEPARTURES_WIDGET = 'transitous_departures';
@@ -283,39 +282,70 @@ export const WIDGETS = {
           count,
           contact: settings.contact || undefined,
         });
-        // Liniennummern für die Badges den Haltestellen zuordnen.
+
+        /*
+         * Liniennummern für die Badges anhand der Haltestellen-ID sammeln.
+         *
+         * Es wird ausschließlich departure.line verwendet.
+         * displayedMode ist kein Ersatz für eine fehlende Liniennummer:
+         * Unbekannte oder andersartige Werte dürfen nicht irreführend
+         * als Liniennummer im Badge erscheinen.
+         *
+         * Voraussetzung: transitous.js muss jeder Abfahrt die ID der
+         * Haltestelle zuordnen, für die diese Abfahrt abgefragt wurde.
+         */
         const linesByStopId = new Map();
 
         for (const departure of result.departures) {
-          if (!departure.stopId) continue;
+          if (!departure.stopId || !departure.line) continue;
 
-          const line = departure.line || departure.displayedMode;
+          const line = String(departure.line).trim();
+
+          // Leere oder nur aus Leerzeichen bestehende Angaben überspringen.
           if (!line) continue;
 
           const existing = linesByStopId.get(departure.stopId) || [];
 
-        if (!existing.includes(line)) {
-          existing.push(line);
+          // Eine Linie pro Haltestelle nur einmal anzeigen.
+          if (!existing.includes(line)) {
+            existing.push(line);
           }
 
-        linesByStopId.set(departure.stopId, existing);
-      }
+          linesByStopId.set(departure.stopId, existing);
+        }
 
-if (result.stopsSelected.length > 0) {
-  components.push({
+        if (result.stopsSelected.length > 0) {
+          components.push({
             type: 'card-list',
             display: 'list',
-            items: result.stopsSelected.slice(0, 8).map((stop) => ({
-              title: `${stop.distanceMeters} m · ${stop.name}`,
-              badge: {
-                text: [
-                  stop.category,
-                  ...(linesByStopId.get(stop.stopId) || []),
-                  `${stop.distanceMeters} m`,
-                ].join(' · '),
-              color: CATEGORY_COLORS[stop.category] || 'neutral',
-              },
-            })),
+            items: result.stopsSelected.slice(0, 8).map((stop) => {
+              const badgeParts = [
+                ...(linesByStopId.get(stop.stopId) || []),
+                stop.distanceMeters !== null &&
+                stop.distanceMeters !== undefined
+                  ? `${stop.distanceMeters} m`
+                  : '',
+                stop.category || '',
+              ].filter(Boolean);
+
+              return {
+                // Erst der Haltestellenname, danach die Entfernung.
+                title: [
+                  stop.name || '',
+                  stop.distanceMeters !== null &&
+                  stop.distanceMeters !== undefined
+                    ? `${stop.distanceMeters} m`
+                    : '',
+                ].filter(Boolean).join(' · '),
+
+                badge: {
+                  // Reihenfolge: Liniennummer, Entfernung, Kategorie.
+                  // Nicht vorhandene Angaben werden vollständig weggelassen.
+                  text: badgeParts.join(' · '),
+                  color: CATEGORY_COLORS[stop.category] || 'neutral',
+                },
+              };
+            }),
           });
         } else {
           components.push(text(t.noStops));
@@ -333,6 +363,7 @@ if (result.stopsSelected.length > 0) {
 
         components.push(
           ...result.departures.slice(0, count).map((departure) => {
+            // Die vorhandene Darstellung der Abfahrtskacheln bleibt erhalten.
             const line = departure.line || departure.displayedMode;
             const cancelled = departure.status === 'CANCELLED';
 
