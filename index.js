@@ -1,7 +1,21 @@
 import { GladysIntegration, logger } from '@gladysassistant/integration-sdk';
 import { WIDGETS, refreshWidgets } from './src/widgets.js';
+import { readFile } from 'node:fs/promises';
 
 const gladys = new GladysIntegration();
+
+// Testbild für die Abfahrtskarten bereitstellen.
+gladys.onWidgetGetImage(async (imageKey) => {
+  if (imageKey !== 'bus_test') {
+    throw new Error(`Unbekannter Widget-Bildschlüssel: ${imageKey}`);
+  }
+
+  const image = await readFile(
+    new URL('./images/bus_test.png', import.meta.url),
+  );
+
+  return image.toString('base64');
+});
 
 // Dashboard-Widgets registrieren.
 for (const [widgetKey, widget] of Object.entries(WIDGETS)) {
