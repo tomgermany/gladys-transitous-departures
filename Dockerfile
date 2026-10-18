@@ -29,6 +29,7 @@ COPY gladys-assistant-integration.json ./
 # VOLUME: changes made to /data after it are discarded. Without this, /data is
 # root-owned and the integration cannot write to it.
 ENV NODE_ENV=production
+ENV DEBUG=gladys-integration-sdk
 RUN mkdir -p /data && chown node:node /data
 VOLUME ["/data"]
 
