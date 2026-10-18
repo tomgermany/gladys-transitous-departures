@@ -14,3 +14,7 @@ Ein Beispiel mit Lissabon:
 Sie erhalten u.a. die nächsten Abfahrten von  Fähren im Linienverkehr, Seilbahnen im Linienverkehr, Busse, Überlandbusse, Straßenbahnen, Schnellzüge und weitere in einem von ihnen festlegbaren Suchkreis um eine Geolocation.
 
 Übrigens, zur Zeit vier Sprachen Spanisch, Englisch, Deutsch und Französisch, Kalaallisut und Koreanisch.
+
+Hinweis:
+
+Data provided by [Transitous](https://transitous.org/). Please see the [Transitous data sources and attribution information](https://transitous.org/sources/).
