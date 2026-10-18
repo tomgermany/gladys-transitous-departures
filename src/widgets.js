@@ -232,42 +232,59 @@ function shortText(value, maxLength) {
  * Das Bild wird anhand der Verkehrsmittelkategorie ausgewählt.
  * Unbekannte Kategorien verwenden bus-test als Fallback.
  */
+
 function createDepartureCard(departure, distanceByStopId, messages) {
   const cancelled = departure.status === 'CANCELLED';
   const line = departure.line || departure.displayedMode || '';
   const distance = distanceByStopId.get(departure.stopId);
 
+  // Entfernung für das Badge vorbereiten.
+  const distanceLabel =
+    distance !== undefined ? `${distance} m` : '';
+
+  // Linie so kürzen, dass Linie und Entfernung zusammenpassen.
+  const maxLineLength = distanceLabel
+    ? Math.max(1, 16 - distanceLabel.length - 3)
+    : 16;
+
+  const lineLabel = shortText(
+    line || messages.unknownDestination,
+    maxLineLength,
+  );
+
+  const badgeText = [lineLabel, distanceLabel]
+    .filter(Boolean)
+    .join(' · ');
+
   return {
-    // Haltestelle der jeweiligen Abfahrt.
-    title: shortText(departure.stopName || 'Unbekannte Haltestelle', 60),
+    // Zeile 1: Haltestellenname.
+    title: shortText(
+      departure.stopName || 'Unbekannte Haltestelle',
+      60,
+    ),
 
-    // Entfernung zur passenden Haltestelle.
-    // Wenn keine Entfernung zugeordnet werden kann, bleibt das Feld leer.
-    ...(distance !== undefined
-      ? { subtitle: `${distance} m` }
-      : {}),
+    // Zeile 3: Nur die bereits lokal umgerechnete Uhrzeit.
+    subtitle: departure.time,
 
-    // Vollständiger ISO-8601-Zeitstempel statt einer formatierten Uhrzeit.
-    date: new Date(departure.epochMs).toISOString(),
-
-    // Bildschlüssel aus der zentralen Kategoriezuordnung.
+    // Zeile 2: Testbild anhand der Verkehrsmittelkategorie.
     image: CATEGORY_IMAGES[departure.category] || 'bus-test',
 
-    // Ausfälle sind immer rot; ansonsten gilt die Verkehrsmittelkategorie.
+    // Zeile 4: Linienkennung und Entfernung.
     badge: {
-      text: shortText(line || messages.unknownDestination, 16),
+      text: shortText(badgeText, 16),
       color: cancelled
         ? 'danger'
         : CATEGORY_COLORS[departure.category] || 'primary',
     },
 
-    // Fahrtziel der Abfahrt.
+    // Fahrtziel bleibt für die Detailansicht erhalten.
     description: shortText(
       departure.destination || messages.unknownDestination,
       2000,
     ),
   };
 }
+
 
 export const WIDGETS = {
   [TRANSITOUS_DEPARTURES_WIDGET]: {
