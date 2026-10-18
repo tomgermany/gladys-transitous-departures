@@ -6,7 +6,7 @@ const gladys = new GladysIntegration();
 
 // Testbild für die Abfahrtskarten bereitstellen.
 gladys.onWidgetGetImage(async (imageKey) => {
-  if (imageKey !== 'bus_test') {
+  if (imageKey !== 'bus-test') {
     throw new Error(`Unbekannter Widget-Bildschlüssel: ${imageKey}`);
   }
 
