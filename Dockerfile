@@ -22,6 +22,7 @@ RUN npm ci --omit=dev || npm install --omit=dev
 # Then the integration code.
 COPY index.js ./
 COPY src ./src
+COPY images ./images
 COPY gladys-assistant-integration.json ./
 
 # The only writable location allowed at runtime. Docker creates a new volume
