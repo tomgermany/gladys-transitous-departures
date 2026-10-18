@@ -1,12 +1,39 @@
+
 import { GladysIntegration, logger } from '@gladysassistant/integration-sdk';
 import { WIDGETS, refreshWidgets } from './src/widgets.js';
+import { readFile } from 'node:fs/promises';
 
 const gladys = new GladysIntegration();
+
+/**
+ * Stellt Bilder für die Abfahrtskarten bereit.
+ *
+ * Der SDK-Bildschlüssel lautet "bus-test".
+ * Die Bilddatei selbst heißt weiterhin "bus_test.png".
+ *
+ * Neue Bildschlüssel müssen später hier ergänzt werden,
+ * wenn weitere Verkehrsmittelkategorien eigene Bilder erhalten.
+ */
+gladys.onWidgetGetImage(async (imageKey) => {
+  // Aktuell verwenden alle Abfahrtskarten dasselbe Testbild.
+  if (imageKey !== 'bus-test') {
+    throw new Error(`Unbekannter Widget-Bildschlüssel: ${imageKey}`);
+  }
+
+  // Die Datei liegt im Docker-Image unter /app/images/bus_test.png.
+  const image = await readFile(
+    new URL('./images/bus_test.png', import.meta.url),
+  );
+
+  // Das SDK erwartet den Bildinhalt als Base64 ohne data:-Präfix.
+  return image.toString('base64');
+});
 
 // Dashboard-Widgets registrieren.
 for (const [widgetKey, widget] of Object.entries(WIDGETS)) {
   gladys.onWidgetGet(widgetKey, (request) => widget.get(gladys, request ?? {}));
 
+  // Aktionen registrieren, sofern das Widget Aktionen bereitstellt.
   if (typeof widget.action === 'function') {
     gladys.onWidgetAction(widgetKey, (actionKey, params, { settings }) =>
       widget.action(gladys, { actionKey, params, settings }),
