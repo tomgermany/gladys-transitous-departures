@@ -227,7 +227,10 @@ function createDepartureCard(departure, distanceByStopId, messages) {
       : {}),
 
     // Absoluter Zeitpunkt. Gladys kann ihn in der Benutzerzeitzone darstellen.
-    date: new Date(departure.epochMs).toISOString(),
+   date: new Date(departure.epochMs).toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
 
     // Bild- und Icon-Unterstützung wird in einem späteren Schritt ergänzt.
 
