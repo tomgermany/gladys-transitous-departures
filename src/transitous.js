@@ -63,8 +63,8 @@ function haversineMeters(lat1, lon1, lat2, lon2) {
 /**
  * Ordnet Verkehrsmittel einer gemeinsamen Farbgruppe zu.
  *
- * Die Kategorien werden später in widgets.js für die Farben
- * der Haltestellen-Badges und der Abfahrtskacheln verwendet.
+ * Die Kategorien werden in widgets.js für die Farben der
+ * Haltestellen-Badges und der Abfahrtskacheln verwendet.
  *
  * Unbekannte Verkehrsmittel erhalten keine Kategorie.
  */
@@ -123,12 +123,24 @@ function displayedMode(mode) {
 /**
  * Vereinheitlicht eine Abfahrt für die weitere Verarbeitung.
  *
+ * selectedStopId ist die ID der Haltestelle, für die diese Abfrage
+ * gezielt ausgeführt wurde.
+ *
+ * Falls die API-Antwort keine place.stopId enthält, verwenden wir diese
+ * bekannte Abfrage-ID als Zuordnung. Eine vorhandene ID aus der Antwort
+ * bleibt dagegen erhalten.
+ *
  * Die Kategorie richtet sich grundsätzlich nach dem tatsächlichen
  * Verkehrsmittel der Abfahrt. Die Kategorie der ausgewählten Haltestelle
  * dient nur als Rückfallwert, falls das Verkehrsmittel nicht zugeordnet
  * werden kann.
  */
-function normalizeDeparture(item, selectedStopName, selectedCategory) {
+function normalizeDeparture(
+  item,
+  selectedStopName,
+  selectedCategory,
+  selectedStopId,
+) {
   const place = item.place ?? {};
   const epochMs = getEpoch(getRawTime(item));
   const mode = item.mode || 'UNKNOWN';
@@ -137,8 +149,14 @@ function normalizeDeparture(item, selectedStopName, selectedCategory) {
     epochMs,
     time: epochMs !== null ? formatLocalTime(epochMs, place.tz) : null,
     timezone: place.tz || null,
+
+    // Der Name der gezielt abgefragten Haltestelle hat Vorrang.
     stopName: selectedStopName || place.name || 'Unbekannte Haltestelle',
-    stopId: place.stopId || null,
+
+    // Die gezielte Abfrage-ID dient als Rückfall, falls sie in der
+    // Antwort fehlt. Eine tatsächlich gelieferte ID wird nicht ersetzt.
+    stopId: place.stopId || selectedStopId || null,
+
     mode,
     displayedMode: displayedMode(mode),
     category: modeCategory(mode) || selectedCategory || null,
@@ -295,6 +313,8 @@ export async function getDepartures({
 
   const results = await Promise.all(
     uniqueStops.map(async (stop) => ({
+      // Die Metadaten der gezielt abgefragten Haltestelle mitführen.
+      stopId: stop.stopId,
       stopName: stop.stopName,
       category: stop.category,
       stopTimes: await transitousQuery({
@@ -310,14 +330,19 @@ export async function getDepartures({
 
   // 4. Zeiten vereinheitlichen, vergangene Abfahrten entfernen
   // und chronologisch sortieren.
-  // Die Kategorie wird dabei an jede Abfahrt weitergegeben.
-  // Die tatsächliche Kategorie des Verkehrsmittels hat Vorrang.
+  // Die ID der gezielt abgefragten Haltestelle wird mitgegeben, damit
+  // normalizeDeparture sie bei fehlender API-ID verwenden kann.
   const now = Date.now();
 
   const normalized = results
     .flatMap((result) =>
       result.stopTimes.map((item) =>
-        normalizeDeparture(item, result.stopName, result.category),
+        normalizeDeparture(
+          item,
+          result.stopName,
+          result.category,
+          result.stopId,
+        ),
       ),
     )
     .filter((item) => item.epochMs !== null && item.epochMs >= now - 60_000)
