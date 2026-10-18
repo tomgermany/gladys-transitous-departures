@@ -232,7 +232,8 @@ function createDepartureCard(departure, distanceByStopId, messages) {
       minute: '2-digit',
     }),
 
-    // Bild- und Icon-Unterstützung wird in einem späteren Schritt ergänzt.
+   // Vorläufig für jede Abfahrt dasselbe Testbild verwenden.
+    image: 'bus_test',
 
     // Die Badge-Farbe übernimmt die bisherige zentrale Farblogik.
     // Ausfälle sind immer rot; ansonsten gilt die Verkehrsmittelkategorie.
