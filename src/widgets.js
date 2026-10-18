@@ -283,17 +283,37 @@ export const WIDGETS = {
           count,
           contact: settings.contact || undefined,
         });
+        // Liniennummern für die Badges den Haltestellen zuordnen.
+        const linesByStopId = new Map();
 
-        if (result.stopsSelected.length > 0) {
-          components.push({
+        for (const departure of result.departures) {
+          if (!departure.stopId) continue;
+
+          const line = departure.line || departure.displayedMode;
+          if (!line) continue;
+
+          const existing = linesByStopId.get(departure.stopId) || [];
+
+        if (!existing.includes(line)) {
+          existing.push(line);
+          }
+
+        linesByStopId.set(departure.stopId, existing);
+      }
+
+if (result.stopsSelected.length > 0) {
+  components.push({
             type: 'card-list',
             display: 'list',
             items: result.stopsSelected.slice(0, 8).map((stop) => ({
               title: `${stop.distanceMeters} m · ${stop.name}`,
               badge: {
-                text: stop.category,
-                // Dieselbe zentrale Farbzuordnung wie bei den Abfahrten.
-                color: CATEGORY_COLORS[stop.category] || 'neutral',
+                text: [
+                  stop.category,
+                  ...(linesByStopId.get(stop.stopId) || []),
+                  `${stop.distanceMeters} m`,
+                ].join(' · '),
+              color: CATEGORY_COLORS[stop.category] || 'neutral',
               },
             })),
           });
