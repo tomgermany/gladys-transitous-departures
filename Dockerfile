@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 # Integration image.
 #
-# Gladys sandbox constraints ("the sandbox is the defense"):
+#  Gladys sandbox constraints ("the sandbox is the defense"):
 #   - rootfs mounted READ-ONLY -> never write outside /data
 #   - a single writable volume: /data
 #   - runs as a non-root user
