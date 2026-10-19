@@ -16,12 +16,14 @@ All of this within a configurable radius around your home.
 
 Example:
 
-![Lissabon – Beispielansicht der Transitous-Integration](../test/lissabon.png)
+![Lissabon – Beispielansicht der Transitous-Integration](../images/test-1.png)
 
 Result: For each of the six tiles, the nearest stop is first determined once. That is, the nearest bus stop, nearest ferry, and nearest rail stop.
 The next departure from that stop is then displayed.
 This means: If there is only one stop within your search radius, you will see the next six departures.
 If multiple stops are found, they are displayed using color coding.
+
+
 
 ## Configuration
 
