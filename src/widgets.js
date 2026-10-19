@@ -330,13 +330,19 @@ export const WIDGETS = {
 
               return {
                 // Erst der Haltestellenname, danach die Entfernung.
+                /* Variante 1 - mit Meter
                 title: [
                   stop.name || '',
                   stop.distanceMeters !== null &&
                   stop.distanceMeters !== undefined
                     ? `${stop.distanceMeters} m`
                     : '',
-                ].filter(Boolean).join(' · '),
+                ].filter(Boolean).join(' · '),  */
+
+                // Variante 2 - ohne Meter
+                title: [
+                  stop.name 
+                ].filter(Boolean).join(' · '), 
 
                 badge: {
                   // Reihenfolge: Liniennummer, Entfernung, Kategorie.
