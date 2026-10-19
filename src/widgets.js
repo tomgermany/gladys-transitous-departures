@@ -29,6 +29,7 @@ const CATEGORY_COLORS = {
 const messages = {
   de: {
     heading: 'Abfahrten in der Nähe',
+    futureHeading: 'Abfahrten in der Nähe am',
     foundStops: 'Gefundene Haltestellen:',
     cancelled: 'Cancelled',
     houseLoadError: 'Die Koordinaten des ausgewählten Gladys-Hauses konnten nicht geladen werden.',
@@ -40,6 +41,7 @@ const messages = {
   },
   en: {
     heading: 'Public transport departures nearby',
+    futureHeading: 'Nearby departures on',
     foundStops: 'Stops found:',
     cancelled: 'Cancelled',
     houseLoadError: 'The coordinates of the selected Gladys house could not be loaded.',
@@ -51,6 +53,7 @@ const messages = {
   },
   es: {
     heading: 'Salidas del transporte público cercano',
+    futureHeading: 'Salidas cercanas el',
     foundStops: 'Paradas encontradas:',
     cancelled: 'Cancelled',
     houseLoadError: 'No se han podido cargar las coordenadas de la casa Gladys seleccionada.',
@@ -62,6 +65,7 @@ const messages = {
   },
   fr: {
     heading: 'Départs des transports en commun à proximité',
+    futureHeading: 'Départs à proximité le',
     foundStops: 'Arrêts trouvés :',
     cancelled: 'Cancelled',
     houseLoadError: 'Impossible de charger les coordonnées de la maison Gladys sélectionnée.',
@@ -73,6 +77,7 @@ const messages = {
   },
   ko: {
     heading: '주변 대중교통 출발 정보',
+    futureHeading: '주변 대중교통 출발 정보 -',
     foundStops: '검색된 정류장:',
     cancelled: 'Cancelled',
     houseLoadError: '선택한 Gladys 집의 좌표를 불러올 수 없습니다.',
@@ -84,6 +89,7 @@ const messages = {
   },
   kl: {
     heading: 'Qanitsumi angallatit aallartarfii',
+    futureHeading: 'Qanitsumi angallatit ulloq',
     foundStops: 'Uniffissat nassaarineqartut:',
     cancelled: 'Cancelled',
     houseLoadError: 'Gladys-ip illuata toqqakkap nalaat aaneqarsinnaanngillat.',
@@ -102,6 +108,9 @@ const getMessages = (language) => {
 
 // Der tatsächlich verwendete Suchradius darf niemals über 10 km liegen.
 const MAX_RADIUS = 10000;
+
+// Maximal sieben Tage Vorausblick.
+const MAX_DAYS_AHEAD = 7;
 
 // Merkt sich den aktuellen Radius und die Richtung je Widget-Konfiguration.
 const expandedRadii = new Map();
@@ -122,12 +131,19 @@ function getRadiusSteps(settings) {
     MAX_RADIUS,
     Math.max(1, Number(settings.radius1 ?? 500) || 500),
   );
-  const radius2Add = Math.max(0, Number(settings.radius2_add ?? 1500) || 0);
-  const radius3Add = Math.max(0, Number(settings.radius3_add ?? 3000) || 0);
+
+  const radius2Add = Math.max(
+    0,
+    Number(settings.radius2_add ?? 1500) || 0,
+  );
+
+  const radius3Add = Math.max(
+    0,
+    Number(settings.radius3_add ?? 3000) || 0,
+  );
 
   // Kreis 2 und Kreis 3 werden zusätzlich zum vorherigen Radius gerechnet.
-  // Die Suche startet bei jedem Schritt erneut am ursprünglichen Mittelpunkt.
-  // Doppelte Stufen werden entfernt, beispielsweise bei Erreichen von 10 km.
+  // Doppelte Stufen werden entfernt.
   return [...new Set([
     radius1,
     Math.min(MAX_RADIUS, radius1 + radius2Add),
@@ -136,11 +152,10 @@ function getRadiusSteps(settings) {
 }
 
 /**
- * Erstellt das kompakte Radius-Label.
+ * Erzeugt das kompakte Radius-Label.
  *
  * Der aktuelle Radius steht in eckigen Klammern.
- * Der Pfeil zeigt, in welche Richtung der nächste Klick führt.
- * Die Werte werden in Metern angezeigt, damit das Label möglichst kurz bleibt.
+ * Der Pfeil zeigt die Richtung des nächsten Klicks.
  */
 function getRadiusButtonLabel(steps, currentIndex, direction) {
   const radiusLabel = steps
@@ -161,20 +176,21 @@ function addRadiusButton(components, settings, language, currentRadius) {
   if (steps.length < 2) return;
 
   const radiusKey = getRadiusKey(settings);
+
   const savedState = expandedRadii.get(radiusKey) ?? {
     radius: currentRadius,
     direction: 'forward',
   };
 
-  // Ungültige gespeicherte Zustände auf den aktuellen Radius zurücksetzen.
   const savedIndex = steps.indexOf(savedState.radius);
+
   const currentIndex = savedIndex >= 0
     ? savedIndex
     : Math.max(0, steps.indexOf(currentRadius));
 
-  // An den Endpunkten die Suchrichtung umkehren.
   let direction = savedState.direction;
 
+  // An den Endpunkten die Suchrichtung umkehren.
   if (currentIndex === steps.length - 1) {
     direction = 'backward';
   } else if (currentIndex === 0) {
@@ -201,8 +217,70 @@ function addRadiusButton(components, settings, language, currentRadius) {
 
 function shortText(value, maxLength) {
   const result = String(value ?? '').trim();
+
   if (result.length <= maxLength) return result;
+
   return `${result.slice(0, maxLength - 1)}…`;
+}
+
+/**
+ * Erstellt den Titel des ersten Eintrags der Haltestellen-Cardlist.
+ *
+ * Bei daysAhead = 0 bleibt der bisherige Text unverändert.
+ * Bei daysAhead > 0 wird das Datum der tatsächlichen Suchzeit ergänzt.
+ *
+ * Die Zeitzone wird, sofern verfügbar, aus einer angezeigten Abfahrt
+ * übernommen. Ist keine Zeitzone verfügbar, verwendet Intl die lokale
+ * Zeitzone des Gladys-Servers.
+ *
+ * Diese Funktion verändert nicht die Widget-Überschrift.
+ */
+function getFoundStopsTitle(t, language, daysAhead, searchTime, timezone) {
+  // Bei der heutigen Suche bleibt der bisherige Titel unverändert.
+  if (daysAhead === 0 || !searchTime) {
+    return t.foundStops;
+  }
+
+  const localeByLanguage = {
+    de: 'de-DE',
+    en: 'en-GB',
+    es: 'es-ES',
+    fr: 'fr-FR',
+    ko: 'ko-KR',
+    kl: 'kl-GL',
+  };
+
+  const prefixes = {
+    de: 'Gefundene Haltestellen am',
+    en: 'Stops found on',
+    es: 'Paradas encontradas el',
+    fr: 'Arrêts trouvés le',
+    ko: '검색된 정류장 -',
+    kl: 'Uniffissat ulloq',
+  };
+
+  const lang = String(language ?? 'de').slice(0, 2).toLowerCase();
+  const locale = localeByLanguage[lang] || 'de-DE';
+
+  const options = {
+    day: '2-digit',
+    month: '2-digit',
+  };
+
+  if (timezone) {
+    options.timeZone = timezone;
+  }
+
+  try {
+    const date = new Intl.DateTimeFormat(locale, options)
+      .format(new Date(searchTime));
+
+    return `${prefixes[lang] || prefixes.de} ${date}`;
+  } catch {
+    // Bei einem ungültigen Zeitstempel oder einer ungültigen Zeitzone
+    // bleibt der bekannte Text erhalten.
+    return t.foundStops;
+  }
 }
 
 export const WIDGETS = {
@@ -222,10 +300,22 @@ export const WIDGETS = {
 
       const count = Number(settings.count ?? 6);
       const refreshMinutes = Number(settings.refresh_minutes ?? 30);
-      const ttlSeconds = Math.min(3600, Math.max(600, refreshMinutes * 60));
+      const ttlSeconds = Math.min(
+        3600,
+        Math.max(600, refreshMinutes * 60),
+      );
 
       const t = getMessages(language);
       const components = [];
+
+      // days_ahead kommt aus der Manifest-Einstellung.
+      // Ungültige Werte werden sicher auf 0 zurückgesetzt.
+      const configuredDaysAhead = Number(settings.days_ahead ?? 0);
+      const daysAhead = Number.isInteger(configuredDaysAhead)
+        && configuredDaysAhead >= 0
+        && configuredDaysAhead <= MAX_DAYS_AHEAD
+        ? configuredDaysAhead
+        : 0;
 
       if (settings.house) {
         try {
@@ -243,46 +333,56 @@ export const WIDGETS = {
           }
 
           const houses = await response.json();
-          const house = houses.find((item) => item.selector === settings.house);
+          const house = houses.find(
+            (item) => item.selector === settings.house,
+          );
 
           if (
-            house &&
-            house.latitude !== null &&
-            house.latitude !== undefined &&
-            house.longitude !== null &&
-            house.longitude !== undefined
+            house
+            && house.latitude !== null
+            && house.latitude !== undefined
+            && house.longitude !== null
+            && house.longitude !== undefined
           ) {
             latitude = Number(house.latitude);
             longitude = Number(house.longitude);
           }
         } catch {
           components.push(text(t.houseLoadError));
-          return { ttl_seconds: ttlSeconds, components };
+
+          return {
+            ttl_seconds: ttlSeconds,
+            components,
+          };
         }
       } else {
-        latitude = settings.latitude === undefined ||
-          settings.latitude === null ||
-          settings.latitude === ''
+        latitude = settings.latitude === undefined
+          || settings.latitude === null
+          || settings.latitude === ''
           ? NaN
           : Number(settings.latitude);
 
-        longitude = settings.longitude === undefined ||
-          settings.longitude === null ||
-          settings.longitude === ''
+        longitude = settings.longitude === undefined
+          || settings.longitude === null
+          || settings.longitude === ''
           ? NaN
           : Number(settings.longitude);
       }
 
       if (
-        !Number.isFinite(latitude) ||
-        latitude < -90 ||
-        latitude > 90 ||
-        !Number.isFinite(longitude) ||
-        longitude < -180 ||
-        longitude > 180
+        !Number.isFinite(latitude)
+        || latitude < -90
+        || latitude > 90
+        || !Number.isFinite(longitude)
+        || longitude < -180
+        || longitude > 180
       ) {
         components.push(text(t.invalidLocation));
-        return { ttl_seconds: ttlSeconds, components };
+
+        return {
+          ttl_seconds: ttlSeconds,
+          components,
+        };
       }
 
       try {
@@ -293,12 +393,36 @@ export const WIDGETS = {
           lon: longitude,
           radius,
           count,
+          daysAhead,
           contact: settings.contact || undefined,
         });
 
         // Nur die tatsächlich angezeigten Abfahrten bestimmen,
         // welche Haltestellen einen zusätzlichen Cancelled-Eintrag erhalten.
         const displayedDepartures = result.departures.slice(0, count);
+
+        /*
+         * Ausweichlösung für die nicht funktionierende dynamische
+         * Widget-Überschrift:
+         *
+         * Statt das Widget-Label zu verändern, ergänzen wir das Datum
+         * im ersten Eintrag der Haltestellen-Cardlist.
+         *
+         * Dafür verwenden wir den Suchzeitpunkt aus dem API-Ergebnis.
+         * Die Widget-Überschrift bleibt unverändert.
+         */
+        const searchTime = result.query?.searchTime;
+        const timezone = displayedDepartures.find(
+          (departure) => departure.timezone,
+        )?.timezone;
+
+        const foundStopsTitle = getFoundStopsTitle(
+          t,
+          language,
+          daysAhead,
+          searchTime,
+          timezone,
+        );
 
         const cancelledStopIds = new Set(
           displayedDepartures
@@ -312,9 +436,6 @@ export const WIDGETS = {
          *
          * Es wird ausschließlich departure.line verwendet.
          * displayedMode ist kein Ersatz für eine fehlende Liniennummer.
-         *
-         * Voraussetzung: transitous.js muss jeder Abfahrt die ID der
-         * Haltestelle zuordnen, für die diese Abfahrt abgefragt wurde.
          */
         const linesByStopId = new Map();
 
@@ -337,31 +458,50 @@ export const WIDGETS = {
 
         if (result.stopsSelected.length > 0) {
           const stopItems = [
-            // Die Überschrift ist ein Listeneintrag und keine eigene Komponente.
-            { title: t.foundStops },
+            // Der erste Eintrag erhält jetzt bei +1 bis +7 das Suchdatum.
+            { title: foundStopsTitle },
 
             ...result.stopsSelected.slice(0, 8).flatMap((stop) => {
               const badgeParts = [
                 ...(linesByStopId.get(stop.stopId) || []),
-                stop.distanceMeters !== null &&
-                stop.distanceMeters !== undefined
+                stop.distanceMeters !== null
+                  && stop.distanceMeters !== undefined
                   ? `${stop.distanceMeters} m`
                   : '',
                 stop.category || '',
               ].filter(Boolean);
 
+              // Leerzeichen entfernen und nur vollständige Bestandteile
+              // bis zu einer Gesamtlänge von maximal 16 Zeichen aufnehmen.
+              const badgeText = (() => {
+                const parts = badgeParts
+                  .map((part) => String(part).replace(/\s+/g, ''))
+                  .filter(Boolean);
+
+                let result = '';
+
+                for (const part of parts) {
+                  const candidate = result ? `${result}-${part}` : part;
+
+                  if (candidate.length > 16) break;
+
+                  result = candidate;
+                }
+
+                return result;
+              })();
+
               const normalItem = {
-                // Die normale Haltestellenzeile bleibt unverändert erhalten.
+                // Die normale Haltestellenzeile bleibt erhalten.
                 title: [stop.name || ''].filter(Boolean).join(' · '),
                 badge: {
                   // Reihenfolge: Liniennummer, Entfernung, Kategorie.
-                  text: badgeParts.join('-'),
+                  text: badgeText,
                   color: CATEGORY_COLORS[stop.category] || 'neutral',
                 },
               };
 
-              // Bei mehreren ausgefallenen Abfahrten derselben Haltestelle
-              // wird trotzdem nur ein zusätzlicher roter Eintrag erzeugt.
+              // Pro Haltestelle höchstens ein zusätzlicher roter Eintrag.
               if (cancelledStopIds.has(stop.stopId)) {
                 return [
                   normalItem,
@@ -392,7 +532,10 @@ export const WIDGETS = {
           components.push(text(t.noDepartures));
           addRadiusButton(components, settings, language, radius);
 
-          return { ttl_seconds: ttlSeconds, components };
+          return {
+            ttl_seconds: ttlSeconds,
+            components,
+          };
         }
 
         components.push(
@@ -428,9 +571,8 @@ export const WIDGETS = {
                 LONG_DISTANCE: 'train-front',
                 NIGHT_RAIL: 'train-front',
               })[departure.mode] || 'bus',
-
-              // Ausfälle sind immer rot. Alle anderen Abfahrten verwenden
-              // dieselbe Kategorie-Farbzuordnung wie die Haltestellen-Badges.
+              // Ausfälle sind immer rot.
+              // Sonst gilt dieselbe Farblogik wie für die Haltestellen-Badges.
               color: cancelled
                 ? 'danger'
                 : CATEGORY_COLORS[departure.category] || 'primary',
@@ -442,7 +584,7 @@ export const WIDGETS = {
 
         // Gladys erlaubt höchstens acht Komponenten:
         // 1 Cardlist + maximal 6 Value-Kacheln + 1 Radius-Button.
-        // Die Überschrift benötigt keine eigene Komponente mehr.
+        // Es wird keine zusätzliche Komponente für die Überschrift erzeugt.
         // Falls weitere Komponenten hinzukommen, wird nur der Radius-Button
         // entfernt – niemals eine Abfahrtskachel.
         if (components.length > 8) {
@@ -450,17 +592,25 @@ export const WIDGETS = {
             (component) => component.type === 'button',
           );
 
-          if (buttonIndex !== -1) components.splice(buttonIndex, 1);
+          if (buttonIndex !== -1) {
+            components.splice(buttonIndex, 1);
+          }
         }
 
-        return { ttl_seconds: ttlSeconds, components };
+        return {
+          ttl_seconds: ttlSeconds,
+          components,
+        };
       } catch {
         components.push(text(t.transitousError));
         addRadiusButton(components, settings, language, radius);
 
         if (components.length > 8) components.shift();
 
-        return { ttl_seconds: ttlSeconds, components };
+        return {
+          ttl_seconds: ttlSeconds,
+          components,
+        };
       }
     },
 
@@ -484,8 +634,8 @@ export const WIDGETS = {
 
       // Der Button darf nur zur direkt benachbarten Stufe wechseln.
       if (
-        currentIndex < 0 ||
-        Math.abs(requestedIndex - currentIndex) !== 1
+        currentIndex < 0
+        || Math.abs(requestedIndex - currentIndex) !== 1
       ) {
         return;
       }

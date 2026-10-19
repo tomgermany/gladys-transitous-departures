@@ -4,9 +4,13 @@ const APP_NAME = 'Gladys Transitous Departures';
 const APP_VERSION = '1.5.0';
 const DEFAULT_CONTACT = 'https://github.com/tomgermany/gladys-transitous-departures';
 
+// Erlaubter Vorausblick: heute bis einschließlich sieben Tage voraus.
+const MAX_DAYS_AHEAD = 7;
+const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+
 /**
  * Wandelt unterschiedliche Zeitangaben der API in Unix-Millisekunden um.
- * Sekundenwerte werden dabei automatisch in Millisekunden umgerechnet.
+ * Sekundenwerte werden automatisch in Millisekunden umgerechnet.
  */
 function getEpoch(value) {
   if (typeof value === 'number') {
@@ -63,10 +67,8 @@ function haversineMeters(lat1, lon1, lat2, lon2) {
 /**
  * Ordnet Verkehrsmittel einer gemeinsamen Farbgruppe zu.
  *
- * Die Kategorien werden in widgets.js für die Farben der
+ * Diese Kategorien werden in widgets.js für die Farben der
  * Haltestellen-Badges und der Abfahrtskacheln verwendet.
- *
- * Unbekannte Verkehrsmittel erhalten keine Kategorie.
  */
 function modeCategory(mode) {
   if (mode === 'BUS') return 'BUS';
@@ -130,10 +132,8 @@ function displayedMode(mode) {
  * bekannte Abfrage-ID als Zuordnung. Eine vorhandene ID aus der Antwort
  * bleibt dagegen erhalten.
  *
- * Die Kategorie richtet sich grundsätzlich nach dem tatsächlichen
- * Verkehrsmittel der Abfahrt. Die Kategorie der ausgewählten Haltestelle
- * dient nur als Rückfallwert, falls das Verkehrsmittel nicht zugeordnet
- * werden kann.
+ * Die Kategorie richtet sich nach dem tatsächlichen Verkehrsmittel.
+ * Die Kategorie der ausgewählten Haltestelle ist nur ein Rückfallwert.
  */
 function normalizeDeparture(
   item,
@@ -150,11 +150,8 @@ function normalizeDeparture(
     time: epochMs !== null ? formatLocalTime(epochMs, place.tz) : null,
     timezone: place.tz || null,
 
-    // Der Name der gezielt abgefragten Haltestelle hat Vorrang.
     stopName: selectedStopName || place.name || 'Unbekannte Haltestelle',
 
-    // Die gezielte Abfrage-ID dient als Rückfall, falls sie in der
-    // Antwort fehlt. Eine tatsächlich gelieferte ID wird nicht ersetzt.
     stopId: place.stopId || selectedStopId || null,
 
     mode,
@@ -162,26 +159,71 @@ function normalizeDeparture(
     category: modeCategory(mode) || selectedCategory || null,
     line: item.routeShortName || item.route?.shortName || '',
     destination: item.headsign || item.tripTo || '',
-    status: item.cancelled ? 'CANCELLED' : item.realtime ? 'REALTIME' : 'SCHEDULED',
+    status: item.cancelled
+      ? 'CANCELLED'
+      : item.realtime
+        ? 'REALTIME'
+        : 'SCHEDULED',
     platform: place.platform || item.platform || '',
   };
 }
 
 /**
+ * Berechnet den Suchzeitpunkt für die gewählte Anzahl an Tagen voraus.
+ *
+ * daysAhead = 0: aktueller Zeitpunkt, bisheriges Verhalten.
+ * daysAhead = 1: aktueller Zeitpunkt plus 24 Stunden.
+ * daysAhead = 2: aktueller Zeitpunkt plus 48 Stunden.
+ * ...
+ * daysAhead = 7: aktueller Zeitpunkt plus 168 Stunden.
+ *
+ * Der Zeitpunkt wird als ISO-8601-Zeitstempel mit UTC-Kennzeichnung
+ * an Transitous übergeben. Dadurch ist der Zeitpunkt eindeutig und
+ * nicht von der Zeitzone des Gladys-Servers abhängig.
+ *
+ * Hinweis: Das entspricht einer Verschiebung um volle 24-Stunden-Tage.
+ * An einem Wechsel zwischen Sommer- und Winterzeit kann sich deshalb
+ * die lokale Uhrzeit am Zieltag um eine Stunde unterscheiden.
+ */
+function getSearchTime(daysAhead = 0) {
+  const days = Number(daysAhead);
+
+  // Ungültige Werte sicher auf das bisherige Verhalten zurücksetzen.
+  const validDays = Number.isInteger(days) &&
+    days >= 0 &&
+    days <= MAX_DAYS_AHEAD
+    ? days
+    : 0;
+
+  return Date.now() + validDays * MILLISECONDS_PER_DAY;
+}
+
+/**
  * Ruft Abfahrten entweder für einen konkreten Haltestellen-Identifier
  * oder für einen geografischen Suchbereich ab.
+ *
+ * searchTime ist der gemeinsame Suchzeitpunkt aller Abfragen eines
+ * Widget-Aufrufs. So werden Haltestellensuche und Abfahrtsabfragen
+ * auf denselben Zeitpunkt bezogen.
  */
 async function transitousQuery({
   lat,
   lon,
   radius,
   stopId,
+  searchTime,
   n = 100,
   contact = DEFAULT_CONTACT,
 }) {
   const params = new URLSearchParams({
     n: String(n),
     language: 'en',
+
+    // Transitous erwartet einen Datum-Zeit-Wert im ISO-Format.
+    // arriveBy=false stellt ausdrücklich sicher, dass wir Abfahrten
+    // und nicht Ankünfte abfragen.
+    time: new Date(searchTime).toISOString(),
+    arriveBy: 'false',
   });
 
   if (stopId) {
@@ -219,12 +261,15 @@ async function transitousQuery({
  * lon: Längengrad
  * radius: Suchradius in Metern
  * count: Anzahl der Abfahrten (3 oder 6)
+ * daysAhead: Vorausblick von 0 bis 7 Tagen; Standard ist 0
+ * contact: Kontaktinformation für den Transitous-User-Agent
  */
 export async function getDepartures({
   lat,
   lon,
   radius = 2000,
   count = 6,
+  daysAhead = 0,
   contact = DEFAULT_CONTACT,
 }) {
   if (
@@ -253,11 +298,23 @@ export async function getDepartures({
     count = 6;
   }
 
-  // 1. Haltestellen im gewählten Umkreis suchen.
+  // Vorausblick prüfen und den Zielzeitpunkt genau einmal berechnen.
+  // Alle nachfolgenden API-Aufrufe verwenden denselben Zeitstempel.
+  const requestedDays = Number(daysAhead);
+  daysAhead = Number.isInteger(requestedDays) &&
+    requestedDays >= 0 &&
+    requestedDays <= MAX_DAYS_AHEAD
+    ? requestedDays
+    : 0;
+
+  const searchTime = getSearchTime(daysAhead);
+
+  // 1. Haltestellen im gewählten Umkreis zum Zielzeitpunkt suchen.
   const initial = await transitousQuery({
     lat,
     lon,
     radius,
+    searchTime,
     n: 100,
     contact,
   });
@@ -291,13 +348,21 @@ export async function getDepartures({
     }
   }
 
-  // Die ausgewählten Haltestellen werden nach Luftlinienentfernung sortiert.
+  // Die ausgewählten Haltestellen nach Luftlinienentfernung sortieren.
   const selected = [...nearestByCategory.values()].sort(
     (a, b) => a.distance - b.distance,
   );
 
   if (selected.length === 0) {
     return {
+      query: {
+        lat,
+        lon,
+        radius,
+        count,
+        daysAhead,
+        searchTime: new Date(searchTime).toISOString(),
+      },
       stopsSelected: [],
       departures: [],
       attribution: 'Transitdaten: Transitous – https://transitous.org/sources/',
@@ -313,27 +378,29 @@ export async function getDepartures({
 
   const results = await Promise.all(
     uniqueStops.map(async (stop) => ({
-      // Die Metadaten der gezielt abgefragten Haltestelle mitführen.
       stopId: stop.stopId,
       stopName: stop.stopName,
       category: stop.category,
+
+      // Auch die Einzelabfrage erhält denselben Suchzeitpunkt.
       stopTimes: await transitousQuery({
         lat,
         lon,
         radius,
         stopId: stop.stopId,
+        searchTime,
         n: 100,
         contact,
       }),
     })),
   );
 
-  // 4. Zeiten vereinheitlichen, vergangene Abfahrten entfernen
+  // 4. Zeiten vereinheitlichen, Abfahrten vor dem Suchzeitpunkt entfernen
   // und chronologisch sortieren.
-  // Die ID der gezielt abgefragten Haltestelle wird mitgegeben, damit
-  // normalizeDeparture sie bei fehlender API-ID verwenden kann.
-  const now = Date.now();
-
+  //
+  // Bei daysAhead = 0 entspricht das dem bisherigen Verhalten.
+  // Bei daysAhead > 0 werden Abfahrten vor dem gewählten Zukunftszeitpunkt
+  // ausgeschlossen, nicht lediglich solche vor der aktuellen Uhrzeit.
   const normalized = results
     .flatMap((result) =>
       result.stopTimes.map((item) =>
@@ -345,10 +412,14 @@ export async function getDepartures({
         ),
       ),
     )
-    .filter((item) => item.epochMs !== null && item.epochMs >= now - 60_000)
+    .filter(
+      (item) =>
+        item.epochMs !== null &&
+        item.epochMs >= searchTime - 60_000,
+    )
     .sort((a, b) => a.epochMs - b.epochMs);
 
-  // 5. Doppelte Abfahrten entfernen und gewünschte Anzahl auswählen.
+  // 5. Doppelte Abfahrten entfernen und die gewünschte Anzahl auswählen.
   const seen = new Set();
   const departures = [];
 
@@ -364,7 +435,14 @@ export async function getDepartures({
   }
 
   return {
-    query: { lat, lon, radius, count },
+    query: {
+      lat,
+      lon,
+      radius,
+      count,
+      daysAhead,
+      searchTime: new Date(searchTime).toISOString(),
+    },
     stopsSelected: selected.map((stop) => ({
       category: stop.category,
       name: stop.stopName,
