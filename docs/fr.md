@@ -44,12 +44,16 @@ Tout reste entre vos mains. Transitous.org utilise cet identifiant pour gérer l
 Tenez compte du fournisseur de données lorsque vous définissez ce paramètre. Nous recommandons une durée de 15 minutes.
 6. Après avoir renseigné ces informations, enregistrez-les et placez le widget à l'endroit de votre choix.
 
-![Testergebnisse – Beispielansicht der Transitous-Integration](../images/test-2.png)
-
 Plus précisément : sélectionnez soit votre domicile Galdys, soit saisissez une géolocalisation de votre choix.
 En dessous, vous définissez trois rayons de recherche en mètres. Cela signifie que les arrêts seront recherchés dans ces rayons.
 Les rayons des différents cercles sont additionnés. Si le rayon du cercle 1 est de 300 mètres et que vous entrez 200 mètres pour le cercle 2, alors
-le cercle 2 aura un rayon de recherche de 500 mètres.
+le cercle 2 aura un rayon de recherche de 500 mètres:
+
+![Testergebnisse – Beispielansicht der Transitous-Integration](../images/test-2.png)
+
+Dans la partie inférieure, vous pouvez ensuite choisir de reprogrammer l'affichage de l'heure. L'heure actuellement affichée correspond à l'heure à laquelle Gladys Assistant démarre aujourd'hui. À l'aide du menu déroulant, vous pouvez reprogrammer l'affichage en indiquant le nombre de jours souhaité ; par exemple, 14 h plus 1 jour = demain à 14 h. L'heure est toujours calculée par rapport au moment où l'application démarre. Nous vous recommandons de ne pas marcher moins de 30 minutes:
+
+![Testergebnisse – Beispielansicht der Transitous-Integration](../images/test-3.png)
 
 
    
