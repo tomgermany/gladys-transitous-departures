@@ -1,3 +1,4 @@
+
 import { getDepartures } from './transitous.js';
 
 export const TRANSITOUS_DEPARTURES_WIDGET = 'transitous_departures';
@@ -28,6 +29,8 @@ const CATEGORY_COLORS = {
 const messages = {
   de: {
     heading: 'Abfahrten in der Nähe',
+    foundStops: 'Gefundene Haltestellen:',
+    cancelled: 'Cancelled',
     houseLoadError: 'Die Koordinaten des ausgewählten Gladys-Hauses konnten nicht geladen werden.',
     invalidLocation: 'Bitte wähle ein Gladys-Haus mit hinterlegten Koordinaten oder trage Breitengrad und Längengrad manuell ein.',
     noStops: 'Im gewählten Umkreis wurden keine Haltestellen gefunden.',
@@ -37,6 +40,8 @@ const messages = {
   },
   en: {
     heading: 'Public transport departures nearby',
+    foundStops: 'Stops found:',
+    cancelled: 'Cancelled',
     houseLoadError: 'The coordinates of the selected Gladys house could not be loaded.',
     invalidLocation: 'Please select a Gladys house with coordinates or enter latitude and longitude manually.',
     noStops: 'No stops were found within the selected radius.',
@@ -46,6 +51,8 @@ const messages = {
   },
   es: {
     heading: 'Salidas del transporte público cercano',
+    foundStops: 'Paradas encontradas:',
+    cancelled: 'Cancelled',
     houseLoadError: 'No se han podido cargar las coordenadas de la casa Gladys seleccionada.',
     invalidLocation: 'Selecciona una vivienda Gladys con coordenadas registradas o introduce manualmente la latitud y la longitud.',
     noStops: 'No se han encontrado paradas en el radio seleccionado.',
@@ -55,6 +62,8 @@ const messages = {
   },
   fr: {
     heading: 'Départs des transports en commun à proximité',
+    foundStops: 'Arrêts trouvés :',
+    cancelled: 'Cancelled',
     houseLoadError: 'Impossible de charger les coordonnées de la maison Gladys sélectionnée.',
     invalidLocation: 'Veuillez sélectionner une maison Gladys avec des coordonnées ou saisir manuellement la latitude et la longitude.',
     noStops: 'Aucun arrêt trouvé dans le rayon sélectionné.',
@@ -64,6 +73,8 @@ const messages = {
   },
   ko: {
     heading: '주변 대중교통 출발 정보',
+    foundStops: '검색된 정류장:',
+    cancelled: 'Cancelled',
     houseLoadError: '선택한 Gladys 집의 좌표를 불러올 수 없습니다.',
     invalidLocation: '좌표가 저장된 Gladys 집을 선택하거나 위도와 경도를 수동으로 입력해 주세요.',
     noStops: '선택한 반경 내에 정류장이 없습니다.',
@@ -73,6 +84,8 @@ const messages = {
   },
   kl: {
     heading: 'Qanitsumi angallatit aallartarfii',
+    foundStops: 'Uniffissat nassaarineqartut:',
+    cancelled: 'Cancelled',
     houseLoadError: 'Gladys-ip illuata toqqakkap nalaat aaneqarsinnaanngillat.',
     invalidLocation: 'Gladys-illu nalaanik nalunaarsimasumik toqqagit imalt. sanimut ammut tikeq (latitude/longitude) nammineq allaguk.',
     noStops: 'Ujaasiffiup avatangiisiani uniffissanik nassaartoqanngilaq.',
@@ -212,7 +225,7 @@ export const WIDGETS = {
       const ttlSeconds = Math.min(3600, Math.max(600, refreshMinutes * 60));
 
       const t = getMessages(language);
-      const components = [text(t.heading, 'heading')];
+      const components = [];
 
       if (settings.house) {
         try {
@@ -283,13 +296,22 @@ export const WIDGETS = {
           contact: settings.contact || undefined,
         });
 
+        // Nur die tatsächlich angezeigten Abfahrten bestimmen,
+        // welche Haltestellen einen zusätzlichen Cancelled-Eintrag erhalten.
+        const displayedDepartures = result.departures.slice(0, count);
+
+        const cancelledStopIds = new Set(
+          displayedDepartures
+            .filter((departure) => departure.status === 'CANCELLED')
+            .map((departure) => departure.stopId)
+            .filter(Boolean),
+        );
+
         /*
          * Liniennummern für die Badges anhand der Haltestellen-ID sammeln.
          *
          * Es wird ausschließlich departure.line verwendet.
-         * displayedMode ist kein Ersatz für eine fehlende Liniennummer:
-         * Unbekannte oder andersartige Werte dürfen nicht irreführend
-         * als Liniennummer im Badge erscheinen.
+         * displayedMode ist kein Ersatz für eine fehlende Liniennummer.
          *
          * Voraussetzung: transitous.js muss jeder Abfahrt die ID der
          * Haltestelle zuordnen, für die diese Abfahrt abgefragt wurde.
@@ -301,7 +323,6 @@ export const WIDGETS = {
 
           const line = String(departure.line).trim();
 
-          // Leere oder nur aus Leerzeichen bestehende Angaben überspringen.
           if (!line) continue;
 
           const existing = linesByStopId.get(departure.stopId) || [];
@@ -315,10 +336,11 @@ export const WIDGETS = {
         }
 
         if (result.stopsSelected.length > 0) {
-          components.push({
-            type: 'card-list',
-            display: 'list',
-            items: result.stopsSelected.slice(0, 8).map((stop) => {
+          const stopItems = [
+            // Die Überschrift ist ein Listeneintrag und keine eigene Komponente.
+            { title: t.foundStops },
+
+            ...result.stopsSelected.slice(0, 8).flatMap((stop) => {
               const badgeParts = [
                 ...(linesByStopId.get(stop.stopId) || []),
                 stop.distanceMeters !== null &&
@@ -328,30 +350,39 @@ export const WIDGETS = {
                 stop.category || '',
               ].filter(Boolean);
 
-              return {
-                // Erst der Haltestellenname, danach die Entfernung.
-                /* Variante 1 - mit Meter
-                title: [
-                  stop.name || '',
-                  stop.distanceMeters !== null &&
-                  stop.distanceMeters !== undefined
-                    ? `${stop.distanceMeters} m`
-                    : '',
-                ].filter(Boolean).join(' · '),  */
-
-                // Variante 2 - ohne Meter
-                title: [
-                  stop.name 
-                ].filter(Boolean).join(' · '), 
-
+              const normalItem = {
+                // Die normale Haltestellenzeile bleibt unverändert erhalten.
+                title: [stop.name || ''].filter(Boolean).join(' · '),
                 badge: {
                   // Reihenfolge: Liniennummer, Entfernung, Kategorie.
-                  // Nicht vorhandene Angaben werden vollständig weggelassen.
                   text: badgeParts.join('-'),
                   color: CATEGORY_COLORS[stop.category] || 'neutral',
                 },
               };
+
+              // Bei mehreren ausgefallenen Abfahrten derselben Haltestelle
+              // wird trotzdem nur ein zusätzlicher roter Eintrag erzeugt.
+              if (cancelledStopIds.has(stop.stopId)) {
+                return [
+                  normalItem,
+                  {
+                    title: stop.name || '',
+                    badge: {
+                      text: t.cancelled,
+                      color: 'danger',
+                    },
+                  },
+                ];
+              }
+
+              return [normalItem];
             }),
+          ];
+
+          components.push({
+            type: 'card-list',
+            display: 'list',
+            items: stopItems,
           });
         } else {
           components.push(text(t.noStops));
@@ -361,14 +392,11 @@ export const WIDGETS = {
           components.push(text(t.noDepartures));
           addRadiusButton(components, settings, language, radius);
 
-          // Die Überschrift darf entfallen, damit der Button Platz behält.
-          if (components.length > 8) components.shift();
-
           return { ttl_seconds: ttlSeconds, components };
         }
 
         components.push(
-          ...result.departures.slice(0, count).map((departure) => {
+          ...displayedDepartures.map((departure) => {
             // Die vorhandene Darstellung der Abfahrtskacheln bleibt erhalten.
             const line = departure.line || departure.displayedMode;
             const cancelled = departure.status === 'CANCELLED';
@@ -412,13 +440,10 @@ export const WIDGETS = {
 
         addRadiusButton(components, settings, language, radius);
 
-        // Gladys erlaubt höchstens acht Komponenten.
-        // Zuerst die Überschrift entfernen, Abfahrtskacheln bleiben erhalten.
-        if (components.length > 8 && components[0]?.variant === 'heading') {
-          components.shift();
-        }
-
-        // Falls es weiterhin zu viele Komponenten gibt, wird nur der Button
+        // Gladys erlaubt höchstens acht Komponenten:
+        // 1 Cardlist + maximal 6 Value-Kacheln + 1 Radius-Button.
+        // Die Überschrift benötigt keine eigene Komponente mehr.
+        // Falls weitere Komponenten hinzukommen, wird nur der Radius-Button
         // entfernt – niemals eine Abfahrtskachel.
         if (components.length > 8) {
           const buttonIndex = components.findIndex(
