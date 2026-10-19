@@ -66,8 +66,15 @@ In the lower section, you can then choose to reschedule the time display. The ti
 
 
 
+## Operation
 
+In the top image, you will see a button. This displays the three search areas you have selected, and with each click you move up and then down through these search areas.
 
+The results are initially displayed in the top six tiles. These show: an icon representing the mode of transport (bus, train, aeroplane, ferry, etc.). Below that, the departure time and the destination station.
+
+Each mode of transport has its own colour. Special transport services such as ferries, cable cars, as well as call-a-taxi and Moonliner services, are shown in grey. Cancelled or disrupted journeys are shown in red.
+
+At the bottom of the screen, you will see a list of the stops found. These initially show the stop name, followed by the route number (also colour-coded), the distance from your current location and, where available, the type of vehicle.
 
 
 ## Troubleshooting
