@@ -5,7 +5,7 @@
   "description": {
     "en": "Nearby public transport departures on the Gladys dashboard, powered by Transitous.",
     "es": "Próximas salidas de transporte público en el panel de Gladys, con tecnología de Transitous.",
-    "de": "ÖPNV-Abfahrten in der Nähe im Gladys-Dashboard, bereitgestellt von Transitous.",
+    "de": "Abfahrten in der Nähe im Gladys-Dashboard, bereitgestellt von Transitous.",
     "fr": "Départs des transports publics à proximité sur le tableau de bord Gladys, grâce à Transitous.",
     "ko": "Transitous에서 제공하는 Gladys 대시보드의 주변 대중교통 출발 정보입니다.",
     "kl": "Transitous atorlugu Gladys dashboard-imi qanitsumi qatserisut/angallatit aallartarfii."
@@ -44,7 +44,7 @@
       "label": {
         "en": "Nearby transit departures",
         "es": "Salidas cercanas",
-        "de": "ÖPNV-Abfahrten in der Nähe",
+        "de": "Abfahrten in der Nähe",
         "fr": "Départs à proximité",
         "ko": "주변 대중교통 출발 정보",
         "kl": "Angallatit aallartarfii"
