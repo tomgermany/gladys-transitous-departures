@@ -223,67 +223,58 @@ function shortText(value, maxLength) {
   return `${result.slice(0, maxLength - 1)}…`;
 }
 
-/**
- * Erstellt die dynamische Widget-Überschrift.
+/*
+ * Die dynamische Widget-Überschrift hat im Test nicht funktioniert.
+ * Der bisherige Ansatz bleibt vorerst auskommentiert.
  *
- * Der Zeitstempel stammt aus result.query.searchTime und entspricht damit
- * dem Suchzeitpunkt, den transitous.js auch an die API übergibt.
+ * function getDynamicHeading(t, language, daysAhead, searchTime, timezone) {
+ *   if (daysAhead === 0 || !searchTime) return undefined;
  *
- * Die Zeitzone der ersten Abfahrt wird verwendet, wenn sie verfügbar ist.
- * Ohne Abfahrt dient die lokale Zeitzone des Servers als Rückfallwert.
+ *   const localeByLanguage = {
+ *     de: 'de-DE',
+ *     en: 'en-GB',
+ *     es: 'es-ES',
+ *     fr: 'fr-FR',
+ *     ko: 'ko-KR',
+ *     kl: 'kl-GL',
+ *   };
  *
- * Das Feld label im Widget-Rückgabeobjekt ist ein experimenteller Versuch.
- * Ob Gladys es als dynamische Überschrift verwendet, muss getestet werden.
+ *   const lang = String(language ?? 'de').slice(0, 2).toLowerCase();
+ *   const locale = localeByLanguage[lang] || 'de-DE';
+ *
+ *   const options = {
+ *     day: '2-digit',
+ *     month: '2-digit',
+ *     hour: '2-digit',
+ *     minute: '2-digit',
+ *     hourCycle: 'h23',
+ *   };
+ *
+ *   if (timezone) {
+ *     options.timeZone = timezone;
+ *   }
+ *
+ *   try {
+ *     const parts = new Intl.DateTimeFormat(locale, options)
+ *       .formatToParts(new Date(searchTime));
+ *
+ *     const day = parts.find((part) => part.type === 'day')?.value;
+ *     const month = parts.find((part) => part.type === 'month')?.value;
+ *     const hour = parts.find((part) => part.type === 'hour')?.value;
+ *     const minute = parts.find((part) => part.type === 'minute')?.value;
+ *
+ *     if (!day || !month || !hour || !minute) return undefined;
+ *
+ *     const date = lang === 'en'
+ *       ? `${month}/${day}`
+ *       : `${day}.${month}.`;
+ *
+ *     return `${t.futureHeading} ${date}, ${hour}:${minute}`;
+ *   } catch {
+ *     return undefined;
+ *   }
+ * }
  */
-function getDynamicHeading(t, language, daysAhead, searchTime, timezone) {
-  if (daysAhead === 0 || !searchTime) return undefined;
-
-  const localeByLanguage = {
-    de: 'de-DE',
-    en: 'en-GB',
-    es: 'es-ES',
-    fr: 'fr-FR',
-    ko: 'ko-KR',
-    kl: 'kl-GL',
-  };
-
-  const lang = String(language ?? 'de').slice(0, 2).toLowerCase();
-  const locale = localeByLanguage[lang] || 'de-DE';
-
-  const options = {
-    day: '2-digit',
-    month: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  };
-
-  // Die Zeitzone der Haltestelle verwenden, sofern sie bekannt ist.
-  if (timezone) {
-    options.timeZone = timezone;
-  }
-
-  try {
-    const parts = new Intl.DateTimeFormat(locale, options)
-      .formatToParts(new Date(searchTime));
-
-    const day = parts.find((part) => part.type === 'day')?.value;
-    const month = parts.find((part) => part.type === 'month')?.value;
-    const hour = parts.find((part) => part.type === 'hour')?.value;
-    const minute = parts.find((part) => part.type === 'minute')?.value;
-
-    if (!day || !month || !hour || !minute) return undefined;
-
-    // Das Datum wird bewusst ohne Jahr angezeigt.
-    const date = lang === 'en'
-      ? `${month}/${day}`
-      : `${day}.${month}.`;
-
-    return `${t.futureHeading} ${date}, ${hour}:${minute}`;
-  } catch {
-    return undefined;
-  }
-}
 
 export const WIDGETS = {
   [TRANSITOUS_DEPARTURES_WIDGET]: {
@@ -310,7 +301,7 @@ export const WIDGETS = {
       const t = getMessages(language);
       const components = [];
 
-      // days_ahead kommt aus der neuen Manifest-Einstellung.
+      // days_ahead kommt aus der Manifest-Einstellung.
       // Ungültige Werte werden sicher auf 0 zurückgesetzt.
       const configuredDaysAhead = Number(settings.days_ahead ?? 0);
       const daysAhead = Number.isInteger(configuredDaysAhead)
@@ -403,18 +394,21 @@ export const WIDGETS = {
         // welche Haltestellen einen zusätzlichen Cancelled-Eintrag erhalten.
         const displayedDepartures = result.departures.slice(0, count);
 
-        // Suchzeitpunkt aus dem Ergebnis von transitous.js übernehmen.
-        // So basiert die Überschrift auf demselben Zeitpunkt wie die API-Abfrage.
-        const searchTime = result.query?.searchTime;
-
-        const heading = getDynamicHeading(
-          t,
-          language,
-          daysAhead,
-          searchTime,
-          displayedDepartures.find((departure) => departure.timezone)
-            ?.timezone,
-        );
+        /*
+         * Die dynamische Widget-Überschrift ist vorerst deaktiviert.
+         * Der erste Cardlist-Eintrag bleibt unverändert.
+         *
+         * const searchTime = result.query?.searchTime;
+         *
+         * const heading = getDynamicHeading(
+         *   t,
+         *   language,
+         *   daysAhead,
+         *   searchTime,
+         *   displayedDepartures.find((departure) => departure.timezone)
+         *     ?.timezone,
+         * );
+         */
 
         const cancelledStopIds = new Set(
           displayedDepartures
@@ -450,7 +444,7 @@ export const WIDGETS = {
 
         if (result.stopsSelected.length > 0) {
           const stopItems = [
-            // Die Überschrift ist ein Listeneintrag, keine eigene Komponente.
+            // Der erste Eintrag bleibt unverändert.
             { title: t.foundStops },
 
             ...result.stopsSelected.slice(0, 8).flatMap((stop) => {
@@ -463,61 +457,62 @@ export const WIDGETS = {
                 stop.category || '',
               ].filter(Boolean);
 
-              
-              
+              // Leerzeichen entfernen und nur vollständige Bestandteile
+              // bis zu einer Gesamtlänge von maximal 16 Zeichen aufnehmen.
               const badgeText = (() => {
-                  const parts = badgeParts
+                const parts = badgeParts
                   .map((part) => String(part).replace(/\s+/g, ''))
                   .filter(Boolean);
 
-                  let result = '';
+                let result = '';
 
-                  for (const part of parts) {
-                    const candidate = result ? `${result}-${part}` : part;
+                for (const part of parts) {
+                  const candidate = result ? `${result}-${part}` : part;
 
-                    if (candidate.length > 16) break;
+                  if (candidate.length > 16) break;
 
-                    result = candidate;
-                  }
+                  result = candidate;
+                }
 
-                  return result;
-                })();
+                return result;
+              })();
 
-                const normalItem = {
-                    // Die normale Haltestellenzeile bleibt erhalten.
-                    title: [stop.name || ''].filter(Boolean).join(' · '),
+              const normalItem = {
+                // Die normale Haltestellenzeile bleibt erhalten.
+                title: [stop.name || ''].filter(Boolean).join(' · '),
+                badge: {
+                  // Reihenfolge: Liniennummer, Entfernung, Kategorie.
+                  text: badgeText,
+                  color: CATEGORY_COLORS[stop.category] || 'neutral',
+                },
+              };
+
+              // Pro Haltestelle höchstens ein zusätzlicher roter Eintrag.
+              if (cancelledStopIds.has(stop.stopId)) {
+                return [
+                  normalItem,
+                  {
+                    title: stop.name || '',
                     badge: {
-                      // Vollständige Bestandteile, maximal 16 Zeichen.
-                      text: badgeText,
-                      color: CATEGORY_COLORS[stop.category] || 'neutral',
+                      text: t.cancelled,
+                      color: 'danger',
                     },
-                  };
-                // Pro Haltestelle höchstens ein zusätzlicher roter Eintrag.
-                  if (cancelledStopIds.has(stop.stopId)) {
-                    return [
-                      normalItem,
-                      {
-                        title: stop.name || '',
-                        badge: {
-                          text: t.cancelled,
-                          color: 'danger',
-                        },
-                      },
-                    ];
-                  }
+                  },
+                ];
+              }
 
-                  return [normalItem];
-                }),
-              ];
+              return [normalItem];
+            }),
+          ];
 
-              components.push({
-                type: 'card-list',
-                display: 'list',
-                items: stopItems,
-              });
-            } else {
-              components.push(text(t.noStops));
-            }
+          components.push({
+            type: 'card-list',
+            display: 'list',
+            items: stopItems,
+          });
+        } else {
+          components.push(text(t.noStops));
+        }
 
         if (!result.departures.length) {
           components.push(text(t.noDepartures));
@@ -526,8 +521,7 @@ export const WIDGETS = {
           return {
             ttl_seconds: ttlSeconds,
             components,
-            // Experiment: dynamische Überschrift nur bei days_ahead > 0.
-            ...(heading ? { label: heading } : {}),
+            // ...(heading ? { label: heading } : {}),
           };
         }
 
@@ -593,8 +587,7 @@ export const WIDGETS = {
         return {
           ttl_seconds: ttlSeconds,
           components,
-          // Experiment: Gladys könnte dieses Feld als Widget-Titel verwenden.
-          ...(heading ? { label: heading } : {}),
+          // ...(heading ? { label: heading } : {}),
         };
       } catch {
         components.push(text(t.transitousError));
