@@ -347,7 +347,7 @@ export const WIDGETS = {
                 badge: {
                   // Reihenfolge: Liniennummer, Entfernung, Kategorie.
                   // Nicht vorhandene Angaben werden vollständig weggelassen.
-                  text: badgeParts.join(' · '),
+                  text: badgeParts.join('-'),
                   color: CATEGORY_COLORS[stop.category] || 'neutral',
                 },
               };
