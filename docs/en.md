@@ -60,7 +60,7 @@ radius 2 will have a search radius of 500 metres:
 
 ![Konfiguration – Beispielansicht der Transitous-Integration](../images/test-2.png)
 
-
+In the lower section, you can then choose to reschedule the time display. The time currently shown is the time today when Gladys Assistant starts. Using the drop-down menu, you can reschedule the display by the number of days you wish; for example, 14:00 plus 1 day = tomorrow at 14:00. The time is always based on when the application starts. We recommend that you do not walk for less than 30 minutes. Finally, Transitous asks for a ‘connoisseur’; we do not store this (except in the configuration field) and do not use it. It is used exclusively by Transitous:
 
 ![Konfiguration – Beispielansicht der Transitous-Integration](../images/test-3.png)
 
