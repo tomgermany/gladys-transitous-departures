@@ -8,12 +8,13 @@ Accès Internet pour votre installation de Gladys Assistant
 
 Example:
 
-![Lissabon – Beispielansicht der Transitous-Integration](../test/lissabon.png)
+![Testergebnisse – Beispielansicht der Transitous-Integration](../images/test-1.png)
 
 Résultat : six vignettes affichent dans un premier temps, une seule fois, l'arrêt le plus proche dans chaque catégorie. À savoir : l'arrêt de bus le plus proche, le ferry le plus proche, l'arrêt de transport ferroviaire le plus proche.
 Ensuite, le prochain départ depuis cet arrêt s'affiche.
 Cela signifie que s'il n'y a qu'un seul arrêt dans votre périmètre de recherche, vous obtiendrez les six prochains départs.
 Si plusieurs arrêts sont trouvés, ceux-ci s’affichent avec un code couleur.
+
 
 ## Vous obtenez :
 
@@ -42,6 +43,16 @@ L'intégration ne récupère ni ne consigne cet identifiant.
 Tout reste entre vos mains. Transitous.org utilise cet identifiant pour gérer la charge sur son infrastructure informatique.
 Tenez compte du fournisseur de données lorsque vous définissez ce paramètre. Nous recommandons une durée de 15 minutes.
 6. Après avoir renseigné ces informations, enregistrez-les et placez le widget à l'endroit de votre choix.
+
+![Testergebnisse – Beispielansicht der Transitous-Integration](../images/tes-2.png)
+
+Plus précisément : sélectionnez soit votre domicile Galdys, soit saisissez une géolocalisation de votre choix.
+En dessous, vous définissez trois rayons de recherche en mètres. Cela signifie que les arrêts seront recherchés dans ces rayons.
+Les rayons des différents cercles sont additionnés. Si le rayon du cercle 1 est de 300 mètres et que vous entrez 200 mètres pour le cercle 2, alors
+le cercle 2 aura un rayon de recherche de 500 mètres.
+
+
+   
 
 ## Dépannage
 
