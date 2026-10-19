@@ -463,42 +463,61 @@ export const WIDGETS = {
                 stop.category || '',
               ].filter(Boolean);
 
-              const normalItem = {
-                // Die normale Haltestellenzeile bleibt erhalten.
-                title: [stop.name || ''].filter(Boolean).join(' · '),
-                badge: {
-                  // Reihenfolge: Liniennummer, Entfernung, Kategorie.
-                  text: badgeParts.join('-'),
-                  color: CATEGORY_COLORS[stop.category] || 'neutral',
-                },
-              };
+              
+              
+              const badgeText = (() => {
+                  const parts = badgeParts
+                  .map((part) => String(part).replace(/\s+/g, ''))
+                  .filter(Boolean);
 
-              // Pro Haltestelle höchstens ein zusätzlicher roter Eintrag.
-              if (cancelledStopIds.has(stop.stopId)) {
-                return [
-                  normalItem,
-                  {
-                    title: stop.name || '',
+                  let result = '';
+
+                  for (const part of parts) {
+                    const candidate = result ? `${result}-${part}` : part;
+
+                    if (candidate.length > 16) break;
+
+                    result = candidate;
+                  }
+
+                  return result;
+                })();
+
+                const normalItem = {
+                    // Die normale Haltestellenzeile bleibt erhalten.
+                    title: [stop.name || ''].filter(Boolean).join(' · '),
                     badge: {
-                      text: t.cancelled,
-                      color: 'danger',
+                      // Vollständige Bestandteile, maximal 16 Zeichen.
+                      text: badgeText,
+                      color: CATEGORY_COLORS[stop.category] || 'neutral',
                     },
-                  },
-                ];
-              }
+                  };
+                // Pro Haltestelle höchstens ein zusätzlicher roter Eintrag.
+                  if (cancelledStopIds.has(stop.stopId)) {
+                    return [
+                      normalItem,
+                      {
+                        title: stop.name || '',
+                        badge: {
+                          text: t.cancelled,
+                          color: 'danger',
+                        },
+                      },
+                    ];
+                  }
 
-              return [normalItem];
-            }),
-          ];
+                  return [normalItem];
+                }),
+              ];
 
-          components.push({
-            type: 'card-list',
-            display: 'list',
-            items: stopItems,
-          });
-        } else {
-          components.push(text(t.noStops));
-        }
+              components.push({
+                type: 'card-list',
+                display: 'list',
+                items: stopItems,
+              });
+            } else {
+              components.push(text(t.noStops));
+            }
 
         if (!result.departures.length) {
           components.push(text(t.noDepartures));
