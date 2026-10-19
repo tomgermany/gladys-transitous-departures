@@ -51,7 +51,7 @@ le cercle 2 aura un rayon de recherche de 500 mètres:
 
 ![Testergebnisse – Beispielansicht der Transitous-Integration](../images/test-2.png)
 
-Dans la partie inférieure, vous pouvez ensuite choisir de reprogrammer l'affichage de l'heure. L'heure actuellement affichée correspond à l'heure à laquelle Gladys Assistant démarre aujourd'hui. À l'aide du menu déroulant, vous pouvez reprogrammer l'affichage en indiquant le nombre de jours souhaité ; par exemple, 14 h plus 1 jour = demain à 14 h. L'heure est toujours calculée par rapport au moment où l'application démarre. Nous vous recommandons de ne pas marcher moins de 30 minutes:
+Dans la partie inférieure, vous pouvez ensuite choisir de reprogrammer l'affichage de l'heure. L'heure actuellement affichée correspond à l'heure à laquelle Gladys Assistant démarre aujourd'hui. À l'aide du menu déroulant, vous pouvez reprogrammer l'affichage en indiquant le nombre de jours souhaité ; par exemple, 14 h plus 1 jour = demain à 14 h. L'heure est toujours calculée par rapport au moment où l'application démarre. Nous vous recommandons de ne pas marcher moins de 30 minutes.Nous vous recommandons de ne pas marcher moins de 30 minutes. Enfin, Transitous demande un « connaisseur » ; nous ne conservons pas cette information (sauf dans le champ de configuration) et ne l'utilisons pas. Elle est utilisée exclusivement par Transitous :
 
 ![Testergebnisse – Beispielansicht der Transitous-Integration](../images/test-3.png)
 
