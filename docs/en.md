@@ -16,7 +16,7 @@ All of this within a configurable radius around your home.
 
 Example:
 
-![Lissabon – Beispielansicht der Transitous-Integration](../images/test-1.png)
+![Testergebnisse – Beispielansicht der Transitous-Integration](../images/test-1.png)
 
 Result: For each of the six tiles, the nearest stop is first determined once. That is, the nearest bus stop, nearest ferry, and nearest rail stop.
 The next departure from that stop is then displayed.
@@ -49,7 +49,17 @@ This identifier must be unique—for example, an email address or website.
 It is stored by the integration only in the configuration field there.
 The integration neither retrieves nor documents this identifier.
 Everything remains with you. Transitous.org uses this identifier to manage the load on its IT infrastructure.
-Keep in mind the data provider when setting this. We recommend 15 minutes.
+Keep in mind the data provider when setting this. We recommend 30 minutes.
+
+![Konfiguration – Beispielansicht der Transitous-Integration](../images/test-2.png)
+
+Specifically: Either select your Galdys house or enter a geolocation of your choice.
+Below that, you can define three search radii in metres. This means that bus stops will be searched for within these radii.
+The individual radii are added together. If radius 1 is set to 300 metres and you enter 200 metres for radius 2, then
+radius 2 will have a search radius of 500 metres.
+
+
+
 
 8. After filling out this information, save it and place the widget where you want it.
 
