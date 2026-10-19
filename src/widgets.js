@@ -223,58 +223,65 @@ function shortText(value, maxLength) {
   return `${result.slice(0, maxLength - 1)}…`;
 }
 
-/*
- * Die dynamische Widget-Überschrift hat im Test nicht funktioniert.
- * Der bisherige Ansatz bleibt vorerst auskommentiert.
+/**
+ * Erstellt den Titel des ersten Eintrags der Haltestellen-Cardlist.
  *
- * function getDynamicHeading(t, language, daysAhead, searchTime, timezone) {
- *   if (daysAhead === 0 || !searchTime) return undefined;
+ * Bei daysAhead = 0 bleibt der bisherige Text unverändert.
+ * Bei daysAhead > 0 wird das Datum der tatsächlichen Suchzeit ergänzt.
  *
- *   const localeByLanguage = {
- *     de: 'de-DE',
- *     en: 'en-GB',
- *     es: 'es-ES',
- *     fr: 'fr-FR',
- *     ko: 'ko-KR',
- *     kl: 'kl-GL',
- *   };
+ * Die Zeitzone wird, sofern verfügbar, aus einer angezeigten Abfahrt
+ * übernommen. Ist keine Zeitzone verfügbar, verwendet Intl die lokale
+ * Zeitzone des Gladys-Servers.
  *
- *   const lang = String(language ?? 'de').slice(0, 2).toLowerCase();
- *   const locale = localeByLanguage[lang] || 'de-DE';
- *
- *   const options = {
- *     day: '2-digit',
- *     month: '2-digit',
- *     hour: '2-digit',
- *     minute: '2-digit',
- *     hourCycle: 'h23',
- *   };
- *
- *   if (timezone) {
- *     options.timeZone = timezone;
- *   }
- *
- *   try {
- *     const parts = new Intl.DateTimeFormat(locale, options)
- *       .formatToParts(new Date(searchTime));
- *
- *     const day = parts.find((part) => part.type === 'day')?.value;
- *     const month = parts.find((part) => part.type === 'month')?.value;
- *     const hour = parts.find((part) => part.type === 'hour')?.value;
- *     const minute = parts.find((part) => part.type === 'minute')?.value;
- *
- *     if (!day || !month || !hour || !minute) return undefined;
- *
- *     const date = lang === 'en'
- *       ? `${month}/${day}`
- *       : `${day}.${month}.`;
- *
- *     return `${t.futureHeading} ${date}, ${hour}:${minute}`;
- *   } catch {
- *     return undefined;
- *   }
- * }
+ * Diese Funktion verändert nicht die Widget-Überschrift.
  */
+function getFoundStopsTitle(t, language, daysAhead, searchTime, timezone) {
+  // Bei der heutigen Suche bleibt der bisherige Titel unverändert.
+  if (daysAhead === 0 || !searchTime) {
+    return t.foundStops;
+  }
+
+  const localeByLanguage = {
+    de: 'de-DE',
+    en: 'en-GB',
+    es: 'es-ES',
+    fr: 'fr-FR',
+    ko: 'ko-KR',
+    kl: 'kl-GL',
+  };
+
+  const prefixes = {
+    de: 'Gefundene Haltestellen am',
+    en: 'Stops found on',
+    es: 'Paradas encontradas el',
+    fr: 'Arrêts trouvés le',
+    ko: '검색된 정류장 -',
+    kl: 'Uniffissat ulloq',
+  };
+
+  const lang = String(language ?? 'de').slice(0, 2).toLowerCase();
+  const locale = localeByLanguage[lang] || 'de-DE';
+
+  const options = {
+    day: '2-digit',
+    month: '2-digit',
+  };
+
+  if (timezone) {
+    options.timeZone = timezone;
+  }
+
+  try {
+    const date = new Intl.DateTimeFormat(locale, options)
+      .format(new Date(searchTime));
+
+    return `${prefixes[lang] || prefixes.de} ${date}`;
+  } catch {
+    // Bei einem ungültigen Zeitstempel oder einer ungültigen Zeitzone
+    // bleibt der bekannte Text erhalten.
+    return t.foundStops;
+  }
+}
 
 export const WIDGETS = {
   [TRANSITOUS_DEPARTURES_WIDGET]: {
@@ -395,20 +402,27 @@ export const WIDGETS = {
         const displayedDepartures = result.departures.slice(0, count);
 
         /*
-         * Die dynamische Widget-Überschrift ist vorerst deaktiviert.
-         * Der erste Cardlist-Eintrag bleibt unverändert.
+         * Ausweichlösung für die nicht funktionierende dynamische
+         * Widget-Überschrift:
          *
-         * const searchTime = result.query?.searchTime;
+         * Statt das Widget-Label zu verändern, ergänzen wir das Datum
+         * im ersten Eintrag der Haltestellen-Cardlist.
          *
-         * const heading = getDynamicHeading(
-         *   t,
-         *   language,
-         *   daysAhead,
-         *   searchTime,
-         *   displayedDepartures.find((departure) => departure.timezone)
-         *     ?.timezone,
-         * );
+         * Dafür verwenden wir den Suchzeitpunkt aus dem API-Ergebnis.
+         * Die Widget-Überschrift bleibt unverändert.
          */
+        const searchTime = result.query?.searchTime;
+        const timezone = displayedDepartures.find(
+          (departure) => departure.timezone,
+        )?.timezone;
+
+        const foundStopsTitle = getFoundStopsTitle(
+          t,
+          language,
+          daysAhead,
+          searchTime,
+          timezone,
+        );
 
         const cancelledStopIds = new Set(
           displayedDepartures
@@ -444,8 +458,8 @@ export const WIDGETS = {
 
         if (result.stopsSelected.length > 0) {
           const stopItems = [
-            // Der erste Eintrag bleibt unverändert.
-            { title: t.foundStops },
+            // Der erste Eintrag erhält jetzt bei +1 bis +7 das Suchdatum.
+            { title: foundStopsTitle },
 
             ...result.stopsSelected.slice(0, 8).flatMap((stop) => {
               const badgeParts = [
@@ -521,7 +535,6 @@ export const WIDGETS = {
           return {
             ttl_seconds: ttlSeconds,
             components,
-            // ...(heading ? { label: heading } : {}),
           };
         }
 
@@ -587,7 +600,6 @@ export const WIDGETS = {
         return {
           ttl_seconds: ttlSeconds,
           components,
-          // ...(heading ? { label: heading } : {}),
         };
       } catch {
         components.push(text(t.transitousError));
