@@ -1,3 +1,4 @@
+
 {
   "manifest_version": 1,
   "type": "provider",
@@ -14,8 +15,12 @@
   "docker_image": "ghcr.io/tomgermany/gladys-transitous-departures:3.2.0",
   "gladys_version": ">=5.2.0",
   "cover_image": "https://raw.githubusercontent.com/tomgermany/gladys-transitous-departures/main/cover.png",
-  "categories": ["services"],
-  "transports": ["cloud"],
+  "categories": [
+    "services"
+  ],
+  "transports": [
+    "cloud"
+  ],
   "location": true,
   "config_schema": [
     {
@@ -118,7 +123,6 @@
           "min": -180,
           "max": 180
         },
-                
         {
           "key": "radius1",
           "type": "number",
@@ -191,6 +195,120 @@
           "min": 0,
           "max": 10000
         },
+
+        {
+          "key": "days_ahead",
+          "type": "select",
+          "label": {
+            "en": "Departures ahead",
+            "es": "Salidas futuras",
+            "de": "Abfahrten im Voraus",
+            "fr": "Départs à l’avance",
+            "ko": "미래 출발 정보",
+            "kl": "Siunissami aallarnissamut"
+          },
+          "description": {
+            "en": "Show departures starting at the current time, shifted by 0 to 7 days.",
+            "es": "Mostrar salidas a partir de la hora actual, desplazada de 0 a 7 días.",
+            "de": "Abfahrten ab der aktuellen Uhrzeit anzeigen, um 0 bis 7 Tage verschoben.",
+            "fr": "Afficher les départs à partir de l’heure actuelle, décalée de 0 à 7 jours.",
+            "ko": "현재 시각에서 0~7일 뒤부터 출발 정보를 표시합니다.",
+            "kl": "Maanna piffissamit ullut 0-7 siumut aallartussat takutikkit."
+          },
+          "required": true,
+          "default": "0",
+          "options": [
+            {
+              "value": "0",
+              "label": {
+                "en": "+0 days (now)",
+                "es": "+0 días (ahora)",
+                "de": "+0 Tage (jetzt)",
+                "fr": "+0 jour (maintenant)",
+                "ko": "+0일 (현재)",
+                "kl": "+0 ullut (maanna)"
+              }
+            },
+            {
+              "value": "1",
+              "label": {
+                "en": "+1 day",
+                "es": "+1 día",
+                "de": "+1 Tag",
+                "fr": "+1 jour",
+                "ko": "+1일",
+                "kl": "+1 ullut"
+              }
+            },
+            {
+              "value": "2",
+              "label": {
+                "en": "+2 days",
+                "es": "+2 días",
+                "de": "+2 Tage",
+                "fr": "+2 jours",
+                "ko": "+2일",
+                "kl": "+2 ullut"
+              }
+            },
+            {
+              "value": "3",
+              "label": {
+                "en": "+3 days",
+                "es": "+3 días",
+                "de": "+3 Tage",
+                "fr": "+3 jours",
+                "ko": "+3일",
+                "kl": "+3 ullut"
+              }
+            },
+            {
+              "value": "4",
+              "label": {
+                "en": "+4 days",
+                "es": "+4 días",
+                "de": "+4 Tage",
+                "fr": "+4 jours",
+                "ko": "+4일",
+                "kl": "+4 ullut"
+              }
+            },
+            {
+              "value": "5",
+              "label": {
+                "en": "+5 days",
+                "es": "+5 días",
+                "de": "+5 Tage",
+                "fr": "+5 jours",
+                "ko": "+5일",
+                "kl": "+5 ullut"
+              }
+            },
+            {
+              "value": "6",
+              "label": {
+                "en": "+6 days",
+                "es": "+6 días",
+                "de": "+6 Tage",
+                "fr": "+6 jours",
+                "ko": "+6일",
+                "kl": "+6 ullut"
+              }
+            },
+            {
+              "value": "7",
+              "label": {
+                "en": "+7 days",
+                "es": "+7 días",
+                "de": "+7 Tage",
+                "fr": "+7 jours",
+                "ko": "+7일",
+                "kl": "+7 ullut"
+              }
+            }
+          ]
+        },
+
         {
           "key": "count",
           "type": "select",
@@ -205,27 +323,27 @@
           "required": true,
           "default": "6",
           "options": [
-                {
-                "value": "3",
-                "label": {
-                        "en": "3",
-                        "de": "3",
-                        "fr": "3",
-                        "ko": "3",
-                        "kl": "3"
-                        }
-                  },
-                  {
-                  "value": "6",
-                  "label": {
-                         "en": "6",
-                          "de": "6",
-                          "fr": "6",
-                          "ko": "6",
-                          "kl": "6"
-                          }
-                    }
-                ]
+            {
+              "value": "3",
+              "label": {
+                "en": "3",
+                "de": "3",
+                "fr": "3",
+                "ko": "3",
+                "kl": "3"
+              }
+            },
+            {
+              "value": "6",
+              "label": {
+                "en": "6",
+                "de": "6",
+                "fr": "6",
+                "ko": "6",
+                "kl": "6"
+              }
+            }
+          ]
         },
         {
           "key": "refresh_minutes",
@@ -316,10 +434,10 @@
             "en": "Contact for Transitous (email or website)",
             "es": "Datos de contacto de Transitous (correo electrónico o página web)",
             "de": "Kontakt für Transitous (E-Mail oder Website)",
-	    "fr": "Contact pour Transitous (e-mail ou site web)",
+            "fr": "Contact pour Transitous (e-mail ou site web)",
             "ko": "Transitous 문의처 (이메일 또는 웹사이트)",
             "kl": "Transitous-mut saaffiffik (e-mail imaluunniit nittartagaq)"
-	   },
+          },
           "placeholder": {
             "en": "e.g. github.com",
             "es": "Por ejemplo: github.com",
@@ -327,7 +445,7 @@
             "fr": "ex. github.com",
             "ko": "예: github.com",
             "kl": "ass. github.com"
-	   },
+          },
           "required": true
         }
       ]
