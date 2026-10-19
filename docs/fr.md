@@ -44,7 +44,7 @@ Tout reste entre vos mains. Transitous.org utilise cet identifiant pour gérer l
 Tenez compte du fournisseur de données lorsque vous définissez ce paramètre. Nous recommandons une durée de 15 minutes.
 6. Après avoir renseigné ces informations, enregistrez-les et placez le widget à l'endroit de votre choix.
 
-![Testergebnisse – Beispielansicht der Transitous-Integration](../images/tes-2.png)
+![Testergebnisse – Beispielansicht der Transitous-Integration](../images/test-2.png)
 
 Plus précisément : sélectionnez soit votre domicile Galdys, soit saisissez une géolocalisation de votre choix.
 En dessous, vous définissez trois rayons de recherche en mètres. Cela signifie que les arrêts seront recherchés dans ces rayons.
