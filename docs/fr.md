@@ -55,8 +55,18 @@ Dans la partie inférieure, vous pouvez ensuite choisir de reprogrammer l'affich
 
 ![Testergebnisse – Beispielansicht der Transitous-Integration](../images/test-3.png)
 
+## Mode d'emploi
 
-   
+Sur l'image du haut, vous verrez un bouton. Celui-ci affiche les trois zones de recherche que vous avez sélectionnées, et chaque clic vous permet de passer de la zone supérieure à la zone inférieure, puis inversement.
+
+Les résultats s'affichent dans un premier temps dans les six premières vignettes. Celles-ci indiquent : une icône représentant le mode de transport (bus, train, avion, ferry, etc.) ; en dessous, l'heure de départ et la gare de destination.
+
+Chaque mode de transport est représenté par une couleur distincte. Les services de transport spéciaux, tels que les ferries, les téléphériques, ainsi que les services « Call-a-Taxi » et « Moonliner », sont indiqués en gris. Les trajets annulés ou perturbés sont indiqués en rouge.
+
+Au bas de l'écran, vous verrez s'afficher la liste des arrêts détectés. Celle-ci indique dans un premier temps le nom de l'arrêt, suivi du numéro de ligne (également identifié par un code couleur), de la distance par rapport à votre position actuelle et, le cas échéant, du type de véhicule.
+
+Sur l'image du haut, vous verrez un bouton. Celui-ci affiche les trois zones de recherche que vous avez sélectionnées, et chaque clic vous permet de passer de la zone supérieure à la zone inférieure, puis inversement.
+
 
 ## Dépannage
 
