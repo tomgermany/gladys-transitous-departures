@@ -40,16 +40,18 @@ If multiple stops are found, they are displayed using color coding.
 a.) Your geolocation as the starting point
  (or choose location from Gladys Assistant)
  
-b.) The diameter of the search radius.
+5.) The diameter of the search radius.
 
-c.) The refresh interval in 10-minute increments.
+6.) The refresh interval in 10-minute increments.
 
-d.) A unique identifier for API access at https://transitous.org/.
+7.) A unique identifier for API access at https://transitous.org/.
 This identifier must be unique—for example, an email address or website.
 It is stored by the integration only in the configuration field there.
 The integration neither retrieves nor documents this identifier.
 Everything remains with you. Transitous.org uses this identifier to manage the load on its IT infrastructure.
 Keep in mind the data provider when setting this. We recommend 30 minutes.
+
+8. After filling out this information, save it and place the widget where you want it.
 
 ![Konfiguration – Beispielansicht der Transitous-Integration](../images/test-2.png)
 
@@ -58,10 +60,12 @@ Below that, you can define three search radii in metres. This means that bus sto
 The individual radii are added together. If radius 1 is set to 300 metres and you enter 200 metres for radius 2, then
 radius 2 will have a search radius of 500 metres.
 
+![Konfiguration – Beispielansicht der Transitous-Integration](../images/test-2.png)
 
 
 
-8. After filling out this information, save it and place the widget where you want it.
+
+
 
 
 ## Troubleshooting
